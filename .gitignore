@@ -1,0 +1,5 @@
+.#*
+ebin/
+*.beam
+*~
+iota

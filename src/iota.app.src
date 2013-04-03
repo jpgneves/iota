@@ -1,0 +1,12 @@
+{application, iota,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { iota_app, []}},
+  {env, []}
+ ]}.
