@@ -33,12 +33,16 @@ do_check(Checkers, Info) ->
 
 verify_api(Data, Results) ->
   Checks = [ fun iota_api_checks:internal_consistency/2 ],
+  do_checks(Data, Checks, Results).
+
+verify_layers(Data, Results) ->
+  Checks = [],
+  do_checks(Data, Checks, Results).
+
+do_checks(Data, Checks, ResultsSoFar) ->
   lists:foldl(fun(C, R) ->
                   C(Data, R)
-              end, Results, Checks).
-
-verify_layers({_Module, _Info}, Results) ->
-  Results.
+              end, ResultsSoFar, Checks).
 
 init_results(ModuleName) ->
   {ModuleName, {errors, []}, {warnings, []}}.
