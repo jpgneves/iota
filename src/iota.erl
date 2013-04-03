@@ -17,32 +17,42 @@ print_help() ->
             "    all   - check for all types of violations~n").
 
 run_check(api, Path) ->
-  do_check([fun verify_api/1], scan(Path));
+  do_check([fun verify_api/2], scan(Path));
 run_check(layer, Path) ->
-  do_check([fun verify_layers/1], scan(Path));
+  do_check([fun verify_layers/2], scan(Path));
 run_check(all, Path) ->
-  do_check([fun verify_api/1, fun verify_layers/1], scan(Path)).
+  do_check([fun verify_api/2, fun verify_layers/2], scan(Path)).
 
 do_check(Checkers, Info) ->
-  lists:foreach(fun(I) ->
+  R = lists:map(fun({M, _} = I) ->
                     lists:foldl(fun(C, Results) ->
-                                    [C(I) | Results]
-                                end, [], Checkers)
-                end, Info).
+                                    C(I, Results)
+                                end, init_results(M), Checkers)
+                end, Info),
+  format_results(R).
 
-verify_api({Module, Info}) ->
-  Result = case {get(is_api, Info), get(api, Info)} of
-             {true, []}    -> emit_warning(Module, unrestricted_api);
-             {true, [_|_]} -> ok;
-             {false, _}    -> ok
-           end,
-  {Module, Result}.
+verify_api({Module, Info}, Results) ->
+  case {get(is_api, Info), get(api, Info)} of
+    {true, []}    -> emit_warning(Results, Module, unrestricted_api);
+    {true, [_|_]} -> Results;
+    {false, _}    -> Results
+  end.
 
-verify_layers({_Module, _Info}) ->
-  ok.
+verify_layers({_Module, _Info}, Results) ->
+  Results.
 
-emit_warning(ModuleName, Warning) ->
-  io:format("WARNING: ~s~n", [format_warning(ModuleName, Warning)]).
+init_results(ModuleName) ->
+  {ModuleName, {errors, []}, {warnings, []}}.
+
+add_warning({M, E, {warnings, W}}, Warning) ->
+  {M, E, {warnings, [Warning | W]}}.
+
+add_error({M, {errors, E}, W}, Error) ->
+  {M, {errors, [Error | E]}, W}.
+
+emit_warning(Results, ModuleName, Warning) ->
+  io:format("WARNING: ~s~n", [format_warning(ModuleName, Warning)]),
+  add_warning(Results, {api, Warning}).
 
 emit_error(ModuleName, Error) ->
   io:format("ERROR: ~s~n", [format_error(ModuleName, Error)]).
@@ -55,6 +65,9 @@ format_warning(ModuleName, unrestricted_api) ->
 format_error(_ModuleName, _Error) ->
   lists:flatten(
     io_lib:format("", [])).
+
+format_results(Results) ->
+  io:format("~p~n", [Results]).
 
 scan(Path) ->
   LibEbins = filelib:wildcard("ebin", filename:join(Path, "lib")),
