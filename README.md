@@ -33,6 +33,8 @@ Alternatively you can declare which exported functions are part of the module's 
     -api(all). %% Declares all exported functions are part of the module's API.
     ...
 
+or
+
     ...
     -export([ foo/1, bar/0 ]).
     -api([ foo/1 ]). %% Declares only foo/1 as part of the module's API.
