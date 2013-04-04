@@ -22,6 +22,9 @@ format_warning(ModuleName, {api, unrestricted_api}) ->
     io_lib:format("Module ~p exports all functions as API functions.",
                   [ModuleName])).
 
-format_error(_ModuleName, _Error) ->
+format_error(ModuleName, {layer, invalid_layer_declaration}) ->
   lists:flatten(
-    io_lib:format("", [])).
+    io_lib:format("Module ~p has an invalid layer declaration.", [ModuleName]));
+format_error(ModuleName, {layer, too_many_layers}) ->
+  lists:flatten(
+    io_lib:format("Module ~p belongs to more than one layer.", [ModuleName])).

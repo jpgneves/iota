@@ -36,7 +36,7 @@ verify_api(Data, Results) ->
   do_checks(Data, Checks, Results).
 
 verify_layers(Data, Results) ->
-  Checks = [],
+  Checks = [ fun iota_layer_checks:enforce_single_layer/2 ],
   do_checks(Data, Checks, Results).
 
 do_checks(Data, Checks, ResultsSoFar) ->
@@ -66,7 +66,7 @@ beams(Paths) ->
 get_iota_data(Module) ->
   {ok, {_, [{attributes, Attrs}]}} = beam_lib:chunks(Module, [attributes]),
   IotaAttrs = iota_utils:get(iota, Attrs, []),
-  Layer = iota_utils:get(layer, Attrs, undefined),
+  Layer = iota_utils:get(layer, Attrs, [undefined]),
   Api0 = iota_utils:get(api, Attrs, []),
   IsApi = iota_utils:get(is_api, IotaAttrs, length(Api0) > 0),
   Api = case {IsApi, Api0} of
