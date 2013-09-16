@@ -3,11 +3,13 @@
 -export([ scan/1 ]).
 
 scan(Path) ->
-  Apps = [Path | [filename:join([Path, "lib", L])
-                  || L <- filelib:wildcard("*", filename:join(Path, "lib"))]],
+  AbsPath = filename:absname(Path),
+  Apps = [AbsPath | [filename:join([AbsPath, "lib", L])
+                  || L <- filelib:wildcard("*", filename:join(AbsPath, "lib"))]],
   lists:map(fun(A) -> xref:add_application(iota_xref, A, [{warnings, false}]) end, Apps),
-  LibEbins = filelib:wildcard("ebin", filename:join(Path, "lib")),
-  Beams = beams([filename:join(Path, "ebin"), LibEbins]),
+  LibEbins = filename:join([AbsPath, "lib",
+                            filelib:wildcard("*/ebin", filename:join(AbsPath, "lib"))]),
+  Beams = beams([filename:join(AbsPath, "ebin"), LibEbins]),
   [{list_to_atom(filename:rootname(filename:basename(B))),
     get_iota_data(B)} || B <- Beams].
 
