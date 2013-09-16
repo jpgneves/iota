@@ -10,11 +10,12 @@ check(_, _)      ->
   throw(unrecognized_command).
 
 do_check(Checkers, Info) ->
-  R = lists:map(fun({M, _} = I) ->
-                    lists:foldl(fun(C, Results) ->
-                                    C(I, Results)
-                                end, iota_result:new(M), Checkers)
-                end, Info),
+  R = iota_result:new(),
+  lists:map(fun(I) ->
+                lists:foldl(fun(C, Res) ->
+                                C(I, Res)
+                            end, R, Checkers)
+            end, Info),
   iota_result:format(R).
 
 verify_api(Data, Results) ->
