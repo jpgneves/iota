@@ -5,7 +5,9 @@
 check(api, Path) ->
   do_check([fun verify_api/2], iota_scanner:scan(Path));
 check(all, Path) ->
-  do_check([fun verify_api/2], iota_scanner:scan(Path)).
+  do_check([fun verify_api/2], iota_scanner:scan(Path));
+check(_, _)      ->
+  throw(unrecognized_command).
 
 do_check(Checkers, Info) ->
   R = lists:map(fun({M, _} = I) ->

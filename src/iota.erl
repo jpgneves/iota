@@ -3,10 +3,20 @@
 -export([ main/1 ]).
 
 main([Check, ProjectPath | _]) ->
-  iota_core:check(list_to_atom(Check), ProjectPath);
+  try
+    iota_core:check(list_to_atom(Check), ProjectPath)
+  catch
+    throw:unrecognized_command -> print_help(),
+                                  unrecognized_command
+  end;
 main([Check | _]) ->
   {ok, Cwd} = file:get_cwd(),
-  iota_core:check(list_to_atom(Check), Cwd);
+  try
+    iota_core:check(list_to_atom(Check), Cwd)
+  catch
+    throw:unrecognized_command -> print_help(),
+                                  unrecognized_command
+  end;
 main([]) ->
   print_help().
 
