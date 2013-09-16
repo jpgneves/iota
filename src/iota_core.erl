@@ -4,10 +4,8 @@
 
 check(api, Path) ->
   do_check([fun verify_api/2], iota_scanner:scan(Path));
-check(layer, Path) ->
-  do_check([fun verify_layers/2], iota_scanner:scan(Path));
 check(all, Path) ->
-  do_check([fun verify_api/2, fun verify_layers/2], iota_scanner:scan(Path)).
+  do_check([fun verify_api/2], iota_scanner:scan(Path)).
 
 do_check(Checkers, Info) ->
   R = lists:map(fun({M, _} = I) ->
@@ -19,10 +17,6 @@ do_check(Checkers, Info) ->
 
 verify_api(Data, Results) ->
   Checks = [ fun iota_api_checks:internal_consistency/2 ],
-  do_checks(Data, Checks, Results).
-
-verify_layers(Data, Results) ->
-  Checks = [ fun iota_layer_checks:enforce_single_layer/2 ],
   do_checks(Data, Checks, Results).
 
 do_checks(Data, Checks, ResultsSoFar) ->

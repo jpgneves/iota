@@ -18,7 +18,6 @@ beams(Paths) ->
 get_iota_data(Module) ->
   {ok, {_, [{attributes, Attrs}]}} = beam_lib:chunks(Module, [attributes]),
   IotaAttrs = iota_utils:get(iota, Attrs, []),
-  Layer = iota_utils:get(layer, Attrs, [undefined]),
   Api0 = iota_utils:get(api, Attrs, []),
   IsApi = iota_utils:get(is_api, IotaAttrs, length(Api0) > 0),
   Api = case {IsApi, Api0} of
@@ -27,4 +26,4 @@ get_iota_data(Module) ->
           {true, [_|_]} -> Api0;
           {false, _}    -> []
         end,
-  [{layer, Layer}, {is_api, IsApi}, {api, Api}].
+  [{is_api, IsApi}, {api, Api}].

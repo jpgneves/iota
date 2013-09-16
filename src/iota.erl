@@ -13,5 +13,4 @@ main([]) ->
 print_help() ->
   io:format("usage: iota CHECK [PATH]~n~n  CHECK can be one of the following:~n"
             "    api   - check for api violations~n"
-            "    layer - check for layer violations~n"
             "    all   - check for all types of violations~n").
