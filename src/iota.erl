@@ -3,13 +3,16 @@
 -export([ main/1 ]).
 
 -spec main([string()]) -> ok | unrecognized_command.
+main(["help" | _ ]) ->
+  print_help();
 main([Check, ProjectPath | _]) ->
   handle_result(run(Check, ProjectPath));
 main([Check | _]) ->
   {ok, Cwd} = file:get_cwd(),
   handle_result(run(Check, Cwd));
 main([]) ->
-  print_help().
+  {ok, Cwd} = file:get_cwd(),
+  handle_result(run("all", Cwd)).
 
 run(Check, Path) ->
   try
@@ -25,4 +28,4 @@ handle_result(unrecognized_command) -> halt(1).
 print_help() ->
   io:format("usage: iota CHECK [PATH]~n~n  CHECK can be one of the following:~n"
             "    api   - check for api violations~n"
-            "    all   - check for all types of violations~n").
+            "    all   - check for all types of violations (default)~n").
