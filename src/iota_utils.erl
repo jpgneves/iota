@@ -18,9 +18,9 @@ get(Key, List, Default) ->
   end.
 
 with_xref(Fun) ->
-  xref:start(iota),
+  xref:start(iota_xref),
   try
     Fun()
   after
-    xref:stop(iota)
+    xref:stop(iota_xref)
   end.
