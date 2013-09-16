@@ -14,11 +14,22 @@ internal_consistency({Module, Info}, Results) ->
   end.
 
 external_calls({Module, _Info} = Data, Results) ->
-  Query   = io_lib:format("XC || ~p", [Module]),
+  Query   = lists:flatten(io_lib:format("XC || ~p", [Module])),
   {ok, R} = xref:q(iota_xref, Query),
   verify_external_calls(R, Data, Results).
 
-verify_external_calls([{{CallerM, _, _}, {CalleeM, _, _}}|_], {Module, Info}, Results) ->
-  case iota_utils:get(is_api, Info) of
-    false -> iota_errors:emit_error(Results, CallerM, {api, {call_to_non_api_module, Module}})
-  end.
+verify_external_calls([], _, Results) ->
+  Results;
+verify_external_calls([{{CallerM, _, _}, {_, CalleeF, CalleeA}}| Rest], {Module, Info}, Results) ->
+  NewResults = case iota_utils:get(is_api, Info) of
+                 false -> iota_errors:emit_error(Results, CallerM,
+                                                 {api, {call_to_non_api_module, Module}});
+                 true  -> Api = iota_utils:get(api, Info),
+                          case lists:member({CalleeF, CalleeA}, Api) of
+                            false -> iota_errors:emit_error(Results, CallerM,
+                                                            {api, call_to_non_api_function,
+                                                             {Module, CalleeF, CalleeA}});
+                            true  -> Results
+                          end
+               end,
+  verify_external_calls(Rest, {Module, Info}, NewResults).

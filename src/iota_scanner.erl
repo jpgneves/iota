@@ -5,7 +5,7 @@
 scan(Path) ->
   LibEbins = filelib:wildcard("ebin", filename:join(Path, "lib")),
   Beams = beams([filename:join(Path, "ebin"), LibEbins]),
-  lists:map(fun(B) -> xref:add_module(iota_xref, B) end, Beams),
+  lists:map(fun(B) -> xref:add_module(iota_xref, B, [{warnings, false}]) end, Beams),
   [{list_to_atom(filename:rootname(filename:basename(B))),
     get_iota_data(B)} || B <- Beams].
 

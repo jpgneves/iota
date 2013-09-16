@@ -7,24 +7,29 @@
           lookup/2
         ]).
 
-new() -> dict:new().
+new() -> orddict:new().
 
 lookup(Module, Results) ->
-  case dict:find(Module, Results) of
+  case orddict:find(Module, Results) of
     {ok, Value} -> Value;
     error       -> {{errors, []}, {warnings, []}}
   end.
 
 format(Results) ->
-  io:format("~p~n", [Results]).
+  String = "===== IOTA results =====~n",
+  F = fun({K, {{errors, E}, {warnings, W}}}, Acc) ->
+          Acc ++ io_lib:format("~p - Errors: ~p, Warnings: ~p~n", [K, length(E), length(W)])
+      end,
+  L = orddict:to_list(Results),
+  io:format(lists:foldl(F, String, L)).
 
 add_warning(ModuleName, Warning, Results) ->
   Entry = lookup(ModuleName, Results),
-  dict:store(ModuleName, insert(warnings, Warning, Entry), Results).
+  orddict:store(ModuleName, insert(warnings, Warning, Entry), Results).
 
 add_error(ModuleName, Error, Results) ->
   Entry = lookup(ModuleName, Results),
-  dict:store(ModuleName, insert(errors, Error, Entry), Results).
+  orddict:store(ModuleName, insert(errors, Error, Entry), Results).
 
 insert(warnings, Warning, {E, {warnings, W}}) ->
   {E, {warnings, [Warning | W]}};

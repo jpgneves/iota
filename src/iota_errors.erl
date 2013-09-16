@@ -16,6 +16,10 @@ format_warning(ModuleName, {api, unrestricted_api}) ->
     io_lib:format("Module ~p exports all functions as API functions.",
                   [ModuleName])).
 
-format_error(ModuleName, Error) ->
+format_error(ModuleName, {api, {call_to_non_api_module, TargetModule}}) ->
   lists:flatten(
-    io_lib:format("Module ~p - ~p~n", [ModuleName, Error])).
+    io_lib:format("Non-API module ~p called by ~p~n", [TargetModule, ModuleName]));
+format_error(ModuleName, {api, {call_to_non_api_function, {TModule, TFunction, TArity}}}) ->
+  lists:flatten(
+    io_lib:format("Non-API function ~p:~p/~p called by ~p~n",
+                  [TModule, TFunction, TArity, ModuleName])).

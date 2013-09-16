@@ -10,16 +10,17 @@ check(_, _)      ->
   throw(unrecognized_command).
 
 do_check(Checkers, Info) ->
-  R = iota_result:new(),
-  lists:map(fun(I) ->
-                lists:foldl(fun(C, Res) ->
-                                C(I, Res)
-                            end, R, Checkers)
-            end, Info),
+  R = lists:foldl(fun(I, Acc) ->
+                    lists:foldl(fun(C, Acc2) ->
+                                    C(I, Acc2)
+                                end, Acc, Checkers)
+                end, iota_result:new(), Info),
   iota_result:format(R).
 
 verify_api(Data, Results) ->
-  Checks = [ fun iota_api_checks:internal_consistency/2 ],
+  Checks = [ fun iota_api_checks:internal_consistency/2,
+             fun iota_api_checks:external_calls/2
+           ],
   do_checks(Data, Checks, Results).
 
 do_checks(Data, Checks, ResultsSoFar) ->
