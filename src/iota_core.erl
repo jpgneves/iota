@@ -3,9 +3,9 @@
 -export([ check/2 ]).
 
 check(api, Path) ->
-  do_check([fun verify_api/2], iota_scanner:scan(Path));
+  iota_utils:with_xref(fun() -> do_check([fun verify_api/2], iota_scanner:scan(Path)) end);
 check(all, Path) ->
-  do_check([fun verify_api/2], iota_scanner:scan(Path));
+  iota_utils:with_xref(fun() -> do_check([fun verify_api/2], iota_scanner:scan(Path)) end);
 check(_, _)      ->
   throw(unrecognized_command).
 
