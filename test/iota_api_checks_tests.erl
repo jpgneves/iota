@@ -3,7 +3,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 internal_consistency_test_() ->
-  EmptyResults = iota_result:new(foo),
+  EmptyResults = iota_result:new(),
   ExpectedWarning = iota_errors:emit_warning(EmptyResults,
                                              foo, {api, unrestricted_api}),
   [ ?_assertMatch(ExpectedWarning,
