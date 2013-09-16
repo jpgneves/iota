@@ -29,7 +29,20 @@ or
     -api([ foo/1 ]). %% Declares only foo/1 as part of the module's API.
     ...
 
-Declaring the API functions implicitly declares the module as an API module, and only declaring the module as an API
-module implicitly declares all exported functions as part of the API.
+Declaring the API functions implicitly declares the module as an API module, and only declaring the
+module as an API module implicitly declares all exported functions as part of the API.
 
 If the module declares all it's exported functions as part of its API, iota will emit a warning.
+
+Running iota
+============
+
+You can run iota simply by doing:
+
+    $ make
+    $ ./iota all <path_to_your_application>
+
+Please note that your application must be compiled before, as iota uses xref for the more
+meaningful checks and your declarations need to be baked in as well. :)
+
+A sample application is provided in /priv.
