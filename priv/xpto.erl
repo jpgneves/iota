@@ -2,4 +2,4 @@
 
 -export([ xpto/0 ]).
 
-xpto() -> ok.
+xpto() -> foo:bar().
