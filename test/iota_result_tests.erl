@@ -3,14 +3,14 @@
 -include_lib("eunit/include/eunit.hrl").
 
 new_test_() ->
-  [ ?_assertEqual(dict:new(), iota_result:new()) ].
+  [ ?_assertEqual(orddict:new(), iota_result:new()) ].
 
 add_error_test_() ->
-  ErrorResult = dict:store(foo, {{errors, [foo]}, {warnings, []}}, dict:new()),
+  ErrorResult = orddict:store(foo, {{errors, [foo]}, {warnings, []}}, orddict:new()),
   [ ?_assertEqual(ErrorResult, iota_result:add_error(foo, foo, iota_result:new())) ].
 
 add_warning_test_() ->
-  WarningResult = dict:store(foo, {{errors, []}, {warnings, [foo]}}, dict:new()),
+  WarningResult = orddict:store(foo, {{errors, []}, {warnings, [foo]}}, orddict:new()),
   [ ?_assertEqual(WarningResult, iota_result:add_warning(foo, foo, iota_result:new())) ].
 
 lookup_test_() ->
