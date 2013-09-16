@@ -2,6 +2,7 @@
 
 -export([ main/1 ]).
 
+-spec main([string()]) -> ok | unrecognized_command.
 main([Check, ProjectPath | _]) ->
   try
     iota_core:check(list_to_atom(Check), ProjectPath)
