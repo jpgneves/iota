@@ -3,23 +3,24 @@
 -export([ emit_warning/3,
           emit_error/3 ]).
 
-emit_warning(Results, ModuleName, Warning) ->
-  io:format("WARNING: ~s~n", [format_warning(ModuleName, Warning)]),
-  iota_result:add_warning(ModuleName, Warning, Results).
+emit_warning(Results, Source, Warning) ->
+  io:format("WARNING: ~s~n", [format_warning(Source, Warning)]),
+  iota_result:add_warning(Source, Warning, Results).
 
-emit_error(Results, ModuleName, Error) ->
-  io:format("ERROR: ~s~n", [format_error(ModuleName, Error)]),
-  iota_result:add_error(ModuleName, Error, Results).
+emit_error(Results, Source, Error) ->
+  io:format("ERROR: ~s~n", [format_error(Source, Error)]),
+  iota_result:add_error(Source, Error, Results).
 
-format_warning(ModuleName, {api, unrestricted_api}) ->
+format_warning(Source, {api, unrestricted_api}) ->
   lists:flatten(
     io_lib:format("Module ~p exports all functions as API functions.",
-                  [ModuleName])).
+                  [Source])).
 
-format_error(ModuleName, {api, {call_to_non_api_module, TargetModule}}) ->
+format_error({SourceM, SourceF, SourceA}, {api, {call_to_non_api_module, TargetM}}) ->
   lists:flatten(
-    io_lib:format("Non-API module ~p called by ~p~n", [TargetModule, ModuleName]));
-format_error(ModuleName, {api, {call_to_non_api_function, {TModule, TFunction, TArity}}}) ->
+    io_lib:format("~p:~p/~p calls non-API module ~p~n", [SourceM, SourceF, SourceA, TargetM]));
+format_error({SourceM, SourceF, SourceA},
+             {api, {call_to_non_api_function, {TModule, TFunction, TArity}}}) ->
   lists:flatten(
-    io_lib:format("Non-API function ~p:~p/~p called by ~p~n",
-                  [TModule, TFunction, TArity, ModuleName])).
+    io_lib:format("~p:~p/~p calls non-API function ~p:~p/~p~n",
+                  [SourceM, SourceF, SourceA, TModule, TFunction, TArity])).
