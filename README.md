@@ -3,22 +3,11 @@ iota
 
 iota (Inter-dependency Objective Testing Apparatus) - a tool to enforce clean separation of responsibilities in Erlang code
 
-Layer declarations
-==================
-
-Add a 'layer' attribute to your module, like this:
-
-    -module(foo).
-    -layer(presentation).
-    ...
-
-iota currently enforces a single layer per module, and the layer _must_ take the form of an Erlang atom.
-
 
 API declarations
 ================
 
-A module can be declared as an "API module" (meaning it's the module other applications or layers should invoke)
+A module can be declared as an "API module" (meaning it's the module other applications should invoke)
 for your application in two ways.
 
 You can explicitly declare the module as an API through a special '-iota' attribute:
