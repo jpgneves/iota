@@ -1,25 +1,28 @@
 iota
 ====
 
-iota (Inter-dependency Objective Testing Apparatus) - a tool to enforce clean separation of responsibilities in Erlang code
+iota (Inter-dependency Objective Testing Apparatus) - a tool to enforce clean
+separation of responsibilities in Erlang code
 
 
 API declarations
 ================
 
-A module can be declared as an "API module" (meaning it's the module other applications should invoke)
-for your application in two ways.
+A module can be declared as an API module for an application (meaning it's
+a module other applications should invoke for functionality) in two ways.
 
-You can explicitly declare the module as an API through a special '-iota' attribute:
+You can explicitly declare the entire module as an API through a special
+```-iota``` attribute:
 
     ...
     -iota([{is_api, true}]).
     ...
 
-Alternatively you can declare which exported functions are part of the module's API:
+Alternatively you can declare which exported functions are part of the
+module's API:
 
     ...
-    -api(all). %% Declares all exported functions are part of the module's API.
+    -api(all). %% Declares all exported functions as part of the module's API.
     ...
 
 or
@@ -29,10 +32,19 @@ or
     -api([ foo/1 ]). %% Declares only foo/1 as part of the module's API.
     ...
 
-Declaring the API functions implicitly declares the module as an API module, and only declaring the
-module as an API module implicitly declares all exported functions as part of the API.
+Declaring the API functions implicitly declares the module as an API module,
+and only declaring the module as an API module implicitly declares all
+exported functions as part of the API.
 
-If the module declares all it's exported functions as part of its API, iota will emit a warning.
+If the module declares all its exported functions as part of its API, iota
+will emit a warning.
+
+Additionally, iota will emit warnings if you declare unexported functions
+as part of your API, and errors if any application calls non-API functions
+in modules belonging to other applications.
+
+Intra-module function calls are accepted regardless if they are declared
+as API or not.
 
 Running iota
 ============
@@ -45,7 +57,7 @@ You can run iota simply by doing:
 Please note that your application must be compiled before, as iota uses xref for the more
 meaningful checks and your declarations need to be baked in as well. :)
 
-A sample application is provided in /priv.
+A sample application is provided in ```priv```.
 
 Future work
 ===========
