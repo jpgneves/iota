@@ -46,3 +46,12 @@ Please note that your application must be compiled before, as iota uses xref for
 meaningful checks and your declarations need to be baked in as well. :)
 
 A sample application is provided in /priv.
+
+Future work
+===========
+
+* Improve internal consistency analysis
+* Add support for more kinds of checking (e.g. layer checks through external
+declarations)
+* Add support for whitelisting applications (i.e for applications which will
+never have iota annotations)
