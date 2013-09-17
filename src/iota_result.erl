@@ -16,12 +16,17 @@ lookup(Module, Results) ->
   end.
 
 format(Results) ->
-  String = "===== IOTA results =====~n",
-  F = fun({K, {{errors, E}, {warnings, W}}}, Acc) ->
-          Acc ++ io_lib:format("~p - Errors: ~p, Warnings: ~p~n", [K, length(E), length(W)])
+  io:format("===== IOTA results =====~n"),
+  F = fun({K, {{errors, E}, {warnings, W}}}, {AccE, AccW}) ->
+          NewE = length(E),
+          NewW = length(W),
+          io:format("~p - Errors: ~p, Warnings: ~p~n", [K, NewE, NewW]),
+          {AccE + NewE, AccW + NewW}
       end,
   L = orddict:to_list(Results),
-  io:format(lists:foldl(F, String, L)).
+  {TotalE, TotalW} = lists:foldl(F, {0, 0}, L),
+  io:format("====================~nTotal - Errors:~p Warnings:~p~n",
+            [TotalE, TotalW]).
 
 add_warning(ModuleName, Warning, Results) ->
   Entry = lookup(ModuleName, Results),
