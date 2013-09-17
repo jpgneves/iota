@@ -6,7 +6,16 @@ scan(Path) ->
   AbsPath = filename:absname(Path),
   Apps = [AbsPath | [filename:join([AbsPath, "lib", L])
                   || L <- filelib:wildcard("*", filename:join(AbsPath, "lib"))]],
-  lists:map(fun(A) -> xref:add_application(iota_xref, A, [{warnings, false}]) end, Apps),
+  lists:map(fun(A) ->
+                case xref:add_application(iota_xref, A, [{warnings, false}]) of
+                  {ok, _} = R -> R;
+                  {error, _, {application_clash, _}} ->
+                    [App, Prefix | _] = lists:reverse(filename:split(A)),
+                    N = list_to_atom(string:join([Prefix, App], "_")),
+                    xref:add_application(iota_xref, A, [{warnings, false},
+                                                        {name, N}])
+                end
+            end, Apps),
   LibEbins = [filename:join([A, "ebin"]) || A <- Apps],
   Beams = beams(LibEbins),
   [{list_to_atom(filename:rootname(filename:basename(B))),
