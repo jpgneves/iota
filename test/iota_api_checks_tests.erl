@@ -24,7 +24,7 @@ internal_consistency_test_() ->
   ].
 
 external_calls_xref_error_test_() ->
-  [ ?_assertThrow(error_running_xref,
+  [ ?_assertThrow({error_running_xref, {unknown_constant, "foo"}},
                   iota_utils:with_xref(fun() ->
                                            iota_api_checks:external_calls({foo, bar},
                                                                           iota_result:new())

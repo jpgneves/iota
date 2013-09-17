@@ -7,9 +7,8 @@ scan(Path) ->
   Apps = [AbsPath | [filename:join([AbsPath, "lib", L])
                   || L <- filelib:wildcard("*", filename:join(AbsPath, "lib"))]],
   lists:map(fun(A) -> xref:add_application(iota_xref, A, [{warnings, false}]) end, Apps),
-  LibEbins = filename:join([AbsPath, "lib",
-                            filelib:wildcard("*/ebin", filename:join(AbsPath, "lib"))]),
-  Beams = beams([filename:join(AbsPath, "ebin"), LibEbins]),
+  LibEbins = [filename:join([A, "ebin"]) || A <- Apps],
+  Beams = beams(LibEbins),
   [{list_to_atom(filename:rootname(filename:basename(B))),
     get_iota_data(B)} || B <- Beams].
 

@@ -14,11 +14,13 @@ internal_consistency({Module, Info}, Results) ->
   end.
 
 external_calls({Module, _Info} = Data, Results) ->
-  Query   = lists:flatten(io_lib:format("(Fun) ((App) (XC || ~p : Mod) - (App) (AE - strict AE))",
-                                        [Module])),
+  Query   = lists:flatten(
+              io_lib:format(
+                "(Fun) ((App) (XC || ~p : Mod) - (App) (AE - strict AE))",
+                [Module])),
   case xref:q(iota_xref, Query) of
     {ok, R} -> verify_external_calls(R, Data, Results);
-    {error, xref_compiler, _} -> throw(error_running_xref)
+    {error, xref_compiler, E} -> throw({error_running_xref, E})
   end.
 
 verify_external_calls([], _, Results) ->
