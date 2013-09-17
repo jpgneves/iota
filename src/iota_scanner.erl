@@ -17,6 +17,7 @@ scan(Path) ->
                 end
             end, Apps),
   LibEbins = [filename:join([A, "ebin"]) || A <- Apps],
+  code:add_paths(LibEbins),
   Beams = beams(LibEbins),
   [{list_to_atom(filename:rootname(filename:basename(B))),
     get_iota_data(B)} || B <- Beams].

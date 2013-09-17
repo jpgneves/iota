@@ -4,13 +4,35 @@
           external_calls/2
         ]).
 
-internal_consistency({Module, Info}, Results) ->
+internal_consistency(Data, Results) ->
+  Checks = [ fun(R) -> unrestricted_api_check(Data, R) end,
+             fun(R) -> unexported_api_check(Data, R) end
+           ],
+  lists:foldl(fun(F, Acc) -> F(Acc) end, Results, Checks).
+
+unrestricted_api_check({Module, Info}, Results) ->
   case {iota_utils:get(is_api, Info), iota_utils:get(api, Info)} of
     {true, all}   -> iota_errors:emit_warning(Results,
                                               Module,
                                               {api, unrestricted_api});
     {true, [_|_]} -> Results;
     {false, _}    -> Results
+  end.
+
+unexported_api_check({Module, Info}, Results) ->
+  Exports = Module:module_info(exports),
+  Api = case iota_utils:get(api, Info) of
+          all  -> Exports;
+          List -> List
+        end,
+  ApiSet = sets:from_list(Api),
+  ExportSet = sets:from_list(Exports),
+  case sets:is_subset(ApiSet, ExportSet) of
+    false -> UnexportedApi = sets:to_list(sets:subtract(ApiSet, ExportSet)),
+             iota_errors:emit_error(Results, Module,
+                                    {api, {functions_in_api_but_not_exported,
+                                           UnexportedApi}});
+    true  -> Results
   end.
 
 external_calls({Module, _Info} = Data, Results) ->

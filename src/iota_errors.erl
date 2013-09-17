@@ -16,11 +16,17 @@ format_warning(Source, {api, unrestricted_api}) ->
     io_lib:format("Module ~p exports all functions as API functions.",
                   [Source])).
 
-format_error({SourceM, SourceF, SourceA}, {api, {call_to_non_api_module, TargetM}}) ->
+format_error({SourceM, SourceF, SourceA},
+             {api, {call_to_non_api_module, TargetM}}) ->
   lists:flatten(
-    io_lib:format("~p:~p/~p calls non-API module ~p~n", [SourceM, SourceF, SourceA, TargetM]));
+    io_lib:format("~p:~p/~p calls non-API module ~p~n",
+                  [SourceM, SourceF, SourceA, TargetM]));
 format_error({SourceM, SourceF, SourceA},
              {api, {call_to_non_api_function, {TModule, TFunction, TArity}}}) ->
   lists:flatten(
     io_lib:format("~p:~p/~p calls non-API function ~p:~p/~p~n",
-                  [SourceM, SourceF, SourceA, TModule, TFunction, TArity])).
+                  [SourceM, SourceF, SourceA, TModule, TFunction, TArity]));
+format_error(Module, {api, {functions_in_api_but_not_exported, Funs}}) ->
+  lists:flatten(
+    io_lib:format("Module ~p declares these functions as part of the API but "
+                  "does not export them: ~p~n", [Module, Funs])).
