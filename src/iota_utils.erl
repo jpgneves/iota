@@ -77,8 +77,10 @@ with_xref(XrefServer, Fun, KeepXref) ->
 %% @doc Returns the currently defined xref server for iota.
 -spec get_xref_server() -> pid()|atom().
 get_xref_server() ->
-  {ok, XrefServer} = application:get_env(iota, xref_server),
-  XrefServer.
+  case application:get_env(iota, xref_server) of
+    {ok, XrefServer} -> XrefServer;
+    undefined        -> undefined
+  end.
 
 %% @doc Starts a new xref server, if not already started.
 -spec start_xref_server(XrefServer::pid()|atom()) -> ok.
