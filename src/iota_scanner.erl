@@ -29,8 +29,9 @@
 
 -export([ scan/1 ]).
 
--type directory() :: string().
--type iota_info() :: [{atom(), term()}].
+-type directory()      :: string().
+-type iota_info_item() :: {module(), term()}.
+-type iota_info()      :: [iota_info_item()].
 
 %% @doc Scan the given path and extract iota information from BEAM attributes
 %% for all applications found in the path. Additionally, we add information

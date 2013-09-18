@@ -32,11 +32,35 @@
           external_calls/2
         ]).
 
+%% @doc Perform internal consistency checks on a module. Checks if the
+%% declared API is a subset of the exported functions for a module
+%% and emits a warning if Exported - API = {}, and an error if
+%% API - Exported = {}.
+-spec internal_consistency(Data::iota_scanner:iota_info_item(),
+                           Results::iota_result:iota_result())
+                          -> iota_result:iota_result().
 internal_consistency(Data, Results) ->
   Checks = [ fun(R) -> unrestricted_api_check(Data, R) end,
              fun(R) -> unexported_api_check(Data, R) end
            ],
   lists:foldl(fun(F, Acc) -> F(Acc) end, Results, Checks).
+
+%% @doc Check external calls between applications using xref.
+%% Emits errors if an application calls another application's module which
+%% is not declared as an API module, or if it calls a function that is not
+%% declared as part of the API for that application through the module.
+-spec external_calls(Data::iota_scanner:iota_info_item(),
+                     Results::iota_result:iota_result())
+                    -> iota_result:iota_result().
+external_calls({Module, _Info} = Data, Results) ->
+  Query   = lists:flatten(
+              io_lib:format(
+                "(Fun) ((App) (XC || ~p : Mod) - (App) (AE - strict AE))",
+                [Module])),
+  case xref:q(iota_xref, Query) of
+    {ok, R} -> verify_external_calls(R, Data, Results);
+    {error, xref_compiler, E} -> throw({error_running_xref, E})
+  end.
 
 unrestricted_api_check({Module, Info}, Results) ->
   case {iota_utils:get(is_api, Info), iota_utils:get(api, Info)} of
@@ -66,15 +90,7 @@ unexported_api_check({Module, Info}, Results) ->
 get_exports(Module) ->
   Module:module_info(exports).
 
-external_calls({Module, _Info} = Data, Results) ->
-  Query   = lists:flatten(
-              io_lib:format(
-                "(Fun) ((App) (XC || ~p : Mod) - (App) (AE - strict AE))",
-                [Module])),
-  case xref:q(iota_xref, Query) of
-    {ok, R} -> verify_external_calls(R, Data, Results);
-    {error, xref_compiler, E} -> throw({error_running_xref, E})
-  end.
+
 
 verify_external_calls([], _, Results) ->
   Results;
