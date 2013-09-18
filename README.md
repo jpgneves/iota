@@ -13,21 +13,13 @@ API declarations
 A module can be declared as an API module for an application (meaning it's
 a module other applications should invoke for functionality) in two ways.
 
-You can explicitly declare the entire module as an API through a special
-```-iota``` attribute:
-
-    ...
-    -iota([{is_api, true}]).
-    ...
-
-Alternatively you can declare which exported functions are part of the
-module's API:
+You can explicitly declare the entire module as an API:
 
     ...
     -api(all). %% Declares all exported functions as part of the module's API.
     ...
 
-or
+or you can declare which exported functions are part of the API:
 
     ...
     -export([ foo/1, bar/0 ]).
