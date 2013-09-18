@@ -44,7 +44,7 @@ main([]) ->
 
 run(Check, Path) ->
   try
-    iota_core:check(list_to_atom(Check), Path)
+    iota_core:check(list_to_atom(Check), Path, [{xref_server, iota_xref}])
   catch
     throw:unrecognized_command -> print_help(),
                                   unrecognized_command

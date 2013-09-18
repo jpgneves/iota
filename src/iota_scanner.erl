@@ -27,7 +27,9 @@
 
 -module(iota_scanner).
 
--export([ scan/1 ]).
+-export([ scan/1,
+          scan/2
+        ]).
 
 -type directory()      :: string().
 -type iota_info_item() :: {module(), term()}.
@@ -38,18 +40,24 @@
 %% for all applications found in the iota xref server.
 -spec scan(Path::directory()) -> [{module(), iota_info()}].
 scan(Path) ->
+  scan(Path, []).
+
+-spec scan(Path::directory(), Options::[{atom(), term()}]) ->
+              [{module(), iota_info()}].
+scan(Path, Options) ->
+  XrefServer = iota_utils:get(xref_server, Options, iota_xref),
   AbsPath = filename:absname(Path),
   Apps = [AbsPath | [filename:join([AbsPath, "lib", L])
                      || L <- filelib:wildcard("*",
                                               filename:join(AbsPath, "lib"))]],
   lists:map(fun(A) ->
-                case xref:add_application(iota_xref, A, [{warnings, false}]) of
+                case xref:add_application(XrefServer, A, [{warnings, false}]) of
                   {ok, _} = R -> R;
                   {error, _, {application_clash, _}} ->
                     [App, Prefix | _] = lists:reverse(filename:split(A)),
                     N = list_to_atom(string:join([Prefix, App], "_")),
-                    xref:add_application(iota_xref, A, [{warnings, false},
-                                                        {name, N}])
+                    xref:add_application(XrefServer, A, [{warnings, false},
+                                                         {name, N}])
                 end
             end, Apps),
   LibEbins = [filename:join([A, "ebin"]) || A <- Apps],

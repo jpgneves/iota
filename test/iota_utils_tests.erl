@@ -10,5 +10,5 @@ get_test_() ->
   ].
 
 with_xref_test_() ->
-  [ ?_assertEqual(ok, iota_utils:with_xref(fun() -> ok end))
+  [ ?_assertEqual(ok, iota_utils:with_xref(fun(_) -> ok end, []))
   ].

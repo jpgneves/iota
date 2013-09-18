@@ -27,21 +27,22 @@
 
 -module(iota_core).
 
--export([ check/2 ]).
+-export([ check/3 ]).
 
 -type check_type() :: atom().
 -type directory()  :: string().
 
 %% @doc Run the specified checks for the given Path.
--spec check(Type::check_type(), Path::directory()) -> any().
-check(api, Path) ->
-  iota_utils:with_xref(fun() -> do_check([fun verify_api/2],
-                                         iota_scanner:scan(Path)) end);
-check(all, Path) ->
-  iota_utils:with_xref(fun() -> do_check([fun verify_api/2],
-                                         iota_scanner:scan(Path)) end);
-check(_, _)      ->
-  throw(unrecognized_command).
+-spec check(Type::check_type(), Path::directory(), Options::[{atom(), term()}])
+           -> any().
+check(Type, Path, Options) ->
+  F = fun(Opts) -> do_check(get_checks(Type),
+                            iota_scanner:scan(Path, Opts))
+      end,
+  case iota_utils:get(xref_server, Options, iota_xref) of
+    iota_xref -> iota_utils:with_xref(F, Options);
+    _XRef     -> F(Options)
+  end.
 
 do_check(Checkers, Info) ->
   R = lists:foldl(fun(I, Acc) ->
@@ -50,6 +51,13 @@ do_check(Checkers, Info) ->
                                 end, Acc, Checkers)
                 end, iota_result:new(), Info),
   iota_result:format(R).
+
+get_checks(api) ->
+  [fun verify_api/2];
+get_checks(all) ->
+  get_checks(api);
+get_checks(_) ->
+  throw(unrecognized_command).
 
 verify_api(Data, Results) ->
   Checks = [ fun iota_api_checks:internal_consistency/2,

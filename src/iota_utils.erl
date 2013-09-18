@@ -29,7 +29,7 @@
 
 -export([ get/2,
           get/3,
-          with_xref/1
+          with_xref/2
         ]).
 
 %% @doc Lookup Key in a Key-Value list and throw an exception if not found
@@ -50,11 +50,11 @@ get(Key, List, Default) ->
 
 %% @doc Run Fun with an xref server started and terminate the xref server
 %% afterwards.
--spec with_xref(Fun::fun()) -> any().
-with_xref(Fun) ->
+-spec with_xref(Fun::fun(), ExtraArgs::[{atom(), term()}]) -> any().
+with_xref(Fun, ExtraArgs) ->
   xref:start(iota_xref),
   try
-    Fun()
+    Fun(ExtraArgs)
   after
     xref:stop(iota_xref)
   end.
