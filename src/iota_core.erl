@@ -27,8 +27,8 @@
 
 -module(iota_core).
 
--export([ check/3
-        ]).
+-export([ check/3 ]).
+-api([ check/3 ]).
 
 -type check_type() :: atom().
 -type directory()  :: string().

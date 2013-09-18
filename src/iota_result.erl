@@ -33,6 +33,7 @@
           format/1,
           lookup/2
         ]).
+-api([ lookup/2 ]).
 
 -type iota_result() :: orddict:orddict().
 -type result_info() :: {{errors, [term()]}, {warnings, [term()]}}.
