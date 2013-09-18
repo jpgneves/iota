@@ -33,6 +33,31 @@ scan_test_() ->
    ]
   }.
 
+scan_duplicate_application_name_test_() ->
+  {setup,
+   fun() ->
+       Deps = sel_application:start_app(moka),
+       Moka = moka:start(iota_scanner),
+       moka:replace(Moka, xref, add_application, fun(_, "a/b", [{warnings, false}]) ->
+                                                     {error, foo,
+                                                      {application_clash, dummy}
+                                                     };
+                                                    (_, "a/b", [{warnings, false},
+                                                              {name, a_b}]) ->
+                                                     {ok, foo}
+                                                 end),
+       moka:replace(Moka, get_applications, fun(_) -> ["a/b"] end),
+       moka:load(Moka),
+       {Moka, Deps}
+   end,
+   fun({Moka, Deps}) ->
+       moka:stop(Moka),
+       sel_application:stop_apps(Deps)
+   end,
+   [ ?_assertMatch([], wrap_xref(fun() -> iota_scanner:scan("..") end))
+   ]
+  }.
+
 scan_external_xref_test_() ->
   ExpectedFoo  = {foo, [{is_api, true}, {api, [{foo, 1}]}]},
   ExpectedXpto = {xpto, [{is_api, false}, {api, []}]},

@@ -41,9 +41,7 @@
 scan(Path) ->
   XrefServer = iota_utils:get_xref_server(),
   AbsPath = filename:absname(Path),
-  Apps = [AbsPath | [filename:join([AbsPath, "lib", L])
-                     || L <- filelib:wildcard("*",
-                                              filename:join(AbsPath, "lib"))]],
+  Apps = get_applications(AbsPath),
   lists:map(fun(A) ->
                 case xref:add_application(XrefServer, A, [{warnings, false}]) of
                   {ok, _} = R -> R;
@@ -83,3 +81,8 @@ get_iota_data(Module) ->
 generate_new_name(AppPath) ->
   [App, Prefix | _] = lists:reverse(filename:split(AppPath)),
   list_to_atom(string:join([Prefix, App], "_")).
+
+get_applications(AbsPath) ->
+  [AbsPath | [filename:join([AbsPath, "lib", L])
+              || L <- filelib:wildcard("*",
+                                       filename:join(AbsPath, "lib"))]].
