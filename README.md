@@ -53,7 +53,7 @@ Running iota
 
 You can run iota simply by doing:
 
-    $ make
+    $ make escriptize
     $ ./iota all <path_to_your_application>
 
 Please note that your application must be compiled before, as iota uses xref for the more

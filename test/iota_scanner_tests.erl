@@ -22,9 +22,13 @@ scan_test_() ->
        ok = file:delete("../ebin/derp.beam")
    end,
    [ ?_assertMatch([{_, [_|_]}|_], Wrap(fun() -> iota_scanner:scan("..") end)),
-     ?_assert(lists:member(ExpectedFoo, Wrap(fun() -> iota_scanner:scan("..") end))),
-     ?_assert(lists:member(ExpectedXpto, Wrap(fun() -> iota_scanner:scan("..") end))),
-     ?_assert(lists:member(ExpectedHerp, Wrap(fun() -> iota_scanner:scan("..") end))),
-     ?_assert(lists:member(ExpectedDerp, Wrap(fun() -> iota_scanner:scan("..") end)))
+     ?_assert(lists:member(ExpectedFoo,
+                           Wrap(fun() -> iota_scanner:scan("..") end))),
+     ?_assert(lists:member(ExpectedXpto,
+                           Wrap(fun() -> iota_scanner:scan("..") end))),
+     ?_assert(lists:member(ExpectedHerp,
+                           Wrap(fun() -> iota_scanner:scan("..") end))),
+     ?_assert(lists:member(ExpectedDerp,
+                           Wrap(fun() -> iota_scanner:scan("..") end)))
    ]
   }.
