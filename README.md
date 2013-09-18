@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jpgneves/iota.png?branch=master)](https://travis-ci.org/jpgneves/iota)
+
 iota
 ====
 
