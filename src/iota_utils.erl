@@ -32,7 +32,8 @@
           get_xref_server/0,
           start_xref_server/1,
           stop_xref_server/0,
-          with_xref/2
+          with_xref/2,
+          with_xref/3
         ]).
 
 %% @doc Lookup Key in a Key-Value list and throw an exception if not found
@@ -55,21 +56,45 @@ get(Key, List, Default) ->
 %% afterwards.
 -spec with_xref(XrefServer::pid()|atom(), Fun::fun()) -> any().
 with_xref(XrefServer, Fun) ->
+  with_xref(XrefServer, Fun, false).
+
+%% @doc Run Fun with an xref server started and optionally terminate the
+%% started xref server.
+-spec with_xref(XrefServer::pid()|atom(), Fun::fun(), KeepXref::boolean())
+               -> any().
+with_xref(XrefServer, Fun, KeepXref) ->
   start_xref_server(XrefServer),
   try
     Fun()
   after
-    stop_xref_server(),
+    case KeepXref of
+      false -> stop_xref_server();
+      _     -> ok
+    end,
     application:unset_env(iota, xref_server)
   end.
 
+%% @doc Returns the currently defined xref server for iota.
+-spec get_xref_server() -> pid()|atom().
 get_xref_server() ->
   {ok, XrefServer} = application:get_env(iota, xref_server),
   XrefServer.
 
+%% @doc Starts a new xref server, if not already started.
+-spec start_xref_server(XrefServer::pid()|atom()) -> ok.
 start_xref_server(XrefServer) ->
   Server = maybe_start_xref_server(XrefServer),
-  application:set_env(iota, xref_server, Server).
+  application:set_env(iota, xref_server, Server),
+  ok.
+
+%% @doc Stops the current xref server.
+-spec stop_xref_server() -> ok.
+stop_xref_server() ->
+  case application:get_env(iota, xref_server) of
+    undefined    -> ok;
+    {ok, Server} -> xref:stop(Server)
+  end,
+  ok.
 
 maybe_start_xref_server(XrefServer) when is_pid(XrefServer) ->
   XrefServer;
@@ -79,10 +104,3 @@ maybe_start_xref_server(XrefServer) ->
     _         -> ok
   end,
   XrefServer.
-
-stop_xref_server() ->
-  case application:get_env(iota, xref_server) of
-    undefined    -> ok;
-    {ok, Server} -> xref:stop(Server)
-  end,
-  ok.
