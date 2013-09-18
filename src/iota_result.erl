@@ -25,7 +25,6 @@
 %%% @author João Neves <sevenjp@gmail.com>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 -module(iota_result).
 
 -export([ add_error/3,
@@ -35,14 +34,23 @@
           lookup/2
         ]).
 
+-type iota_result() :: orddict:orddict().
+-type result_info() :: {{errors, [term()]}, {warnings, [term()]}}.
+
+%% @doc Create a new iota result aggregator
+-spec new() -> iota_result().
 new() -> orddict:new().
 
+%% @doc Lookup results for a module in the results
+-spec lookup(Module::module(), Results::iota_result()) -> result_info().
 lookup(Module, Results) ->
   case orddict:find(Module, Results) of
     {ok, Value} -> Value;
     error       -> {{errors, []}, {warnings, []}}
   end.
 
+%% @doc Print the result to stdout.
+-spec format(Results::iota_result()) -> ok.
 format(Results) ->
   io:format("===== iota report =====~n"),
   F = fun({K, {{errors, E}, {warnings, W}}}, {AccE, AccW}) ->
@@ -56,10 +64,16 @@ format(Results) ->
   io:format("====================~nTotal - Errors:~p Warnings:~p~n",
             [TotalE, TotalW]).
 
+%% @doc Add a Warning to the results for ModuleName.
+-spec add_warning(ModuleName::module(), Warning::iota_errors:warning(),
+                  Results::iota_result()) -> iota_result().
 add_warning(ModuleName, Warning, Results) ->
   Entry = lookup(ModuleName, Results),
   orddict:store(ModuleName, insert(warnings, Warning, Entry), Results).
 
+%% @doc Add an Error to the results for ModuleName.
+-spec add_error(ModuleName::module(), Warning::iota_errors:error(),
+                Results::iota_result()) -> iota_result().
 add_error(ModuleName, Error, Results) ->
   Entry = lookup(ModuleName, Results),
   orddict:store(ModuleName, insert(errors, Error, Entry), Results).

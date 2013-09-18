@@ -30,10 +30,20 @@
 -export([ emit_warning/3,
           emit_error/3 ]).
 
+-type warning() :: any().
+-type error()   :: any().
+-type source()  :: module() | mfa().
+
+%% @doc Print warning to stdout and add it to the current result set
+-spec emit_warning(Results::iota_result:iota_result(), Source::source(),
+                   Warning::warning()) -> iota_result:iota_result().
 emit_warning(Results, Source, Warning) ->
   io:format("WARNING: ~s~n", [format_warning(Source, Warning)]),
   iota_result:add_warning(Source, Warning, Results).
 
+%% @doc Print error to stdout and add it to the current result set
+-spec emit_error(Results::iota_result:iota_result(), Source::source(),
+                 Error::error()) -> iota_result:iota_result().
 emit_error(Results, Source, Error) ->
   io:format("ERROR: ~s~n", [format_error(Source, Error)]),
   iota_result:add_error(Source, Error, Results).

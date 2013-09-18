@@ -29,6 +29,13 @@
 
 -export([ scan/1 ]).
 
+-type directory() :: string().
+-type iota_info() :: [{atom(), term()}].
+
+%% @doc Scan the given path and extract iota information from BEAM attributes
+%% for all applications found in the path. Additionally, we add information
+%% for all applications found in the iota xref server.
+-spec scan(Path::directory()) -> [{module(), iota_info()}].
 scan(Path) ->
   AbsPath = filename:absname(Path),
   Apps = [AbsPath | [filename:join([AbsPath, "lib", L])

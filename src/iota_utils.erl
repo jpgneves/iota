@@ -32,18 +32,25 @@
           with_xref/1
         ]).
 
+%% @doc Lookup Key in a Key-Value list and throw an exception if not found
+-spec get(Key::term(), List::[{term(), term()}]) -> term() | no_result.
 get(Key, List) ->
   case lists:keyfind(Key, 1, List) of
     false        -> throw(key_not_found);
     {Key, Value} -> Value
   end.
 
+%% @doc Lookup Key in a Key-Value list and return a default value if not found
+-spec get(Key::term(), List::[{term(), term()}], Default::term()) -> term().
 get(Key, List, Default) ->
   case lists:keyfind(Key, 1, List) of
     false        -> Default;
     {Key, Value} -> Value
   end.
 
+%% @doc Run Fun with an xref server started and terminate the xref server
+%% afterwards.
+-spec with_xref(Fun::fun()) -> any().
 with_xref(Fun) ->
   xref:start(iota_xref),
   try

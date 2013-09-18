@@ -29,6 +29,11 @@
 
 -export([ check/2 ]).
 
+-type check_type() :: atom().
+-type directory()  :: string().
+
+%% @doc Run the specified checks for the given Path.
+-spec check(Type::check_type(), Path::directory()) -> any().
 check(api, Path) ->
   iota_utils:with_xref(fun() -> do_check([fun verify_api/2],
                                          iota_scanner:scan(Path)) end);
