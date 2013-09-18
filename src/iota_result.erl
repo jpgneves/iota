@@ -61,7 +61,7 @@ format(Results) ->
       end,
   L = orddict:to_list(Results),
   {TotalE, TotalW} = lists:foldl(F, {0, 0}, L),
-  io:format("====================~nTotal - Errors:~p Warnings:~p~n",
+  io:format("=======================~nTotal - Errors:~p Warnings:~p~n",
             [TotalE, TotalW]).
 
 %% @doc Add a Warning to the results for ModuleName.
