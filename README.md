@@ -65,7 +65,7 @@ for you:
     $ ./iota priv/test_app1 describe-api
     ===== iota report =====
     API for test_app1:
-      [{xpto,1}]
+      [{test_app1_mod,xpto,1}]
     API for test_app2:
       []
 

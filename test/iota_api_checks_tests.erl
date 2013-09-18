@@ -5,8 +5,11 @@
 describe_api_test_() ->
   EmptyResults   = iota_result:new(),
   NotApiResults  = iota_result:add_info(bar, [], EmptyResults),
-  SomeApiResults = iota_result:add_info(bar, [{herp,0},{derp,1}], EmptyResults),
-  FullApiResults = iota_result:add_info(bar, [{herp,0},{derp,1},{blah,2}],
+  SomeApiResults = iota_result:add_info(bar, [{foo,herp,0},{foo,derp,1}],
+                                        EmptyResults),
+  FullApiResults = iota_result:add_info(bar, [{foo,herp,0},
+                                              {foo,derp,1},
+                                              {foo,blah,2}],
                                         EmptyResults),
   {setup,
    fun() ->

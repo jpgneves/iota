@@ -41,8 +41,10 @@ describe_api({Module, Info}, Results) ->
   XrefServer = iota_utils:get_xref_server(),
   {ok, [Application]} = xref:q(XrefServer, Query),
   case {iota_utils:get(is_api, Info), iota_utils:get(api, Info)} of
-    {true, all}   -> iota_result:add_info(Application, get_exports(Module), Results);
-    {true, Api}   -> iota_result:add_info(Application, Api, Results);
+    {true, all}   -> Exports = to_mfa(Module, get_exports(Module)),
+                     iota_result:add_info(Application, Exports, Results);
+    {true, Api}   -> iota_result:add_info(Application, to_mfa(Module, Api),
+                                          Results);
     {false, _}    -> iota_result:add_info(Application, [], Results)
   end.
 
@@ -124,3 +126,6 @@ verify_external_calls([{Caller, {CalleeM, CalleeF, CalleeA} = Callee}| Rest],
                           end
                end,
   verify_external_calls(Rest, {Module, Info}, NewResults).
+
+to_mfa(Module, FAs) ->
+  [{Module, F, A} || {F, A} <- FAs].
