@@ -6,6 +6,12 @@ internal_consistency_test_() ->
   EmptyResults = iota_result:new(),
   ExpectedWarning = iota_errors:emit_warning(EmptyResults,
                                              foo, {api, unrestricted_api}),
+  ExpectedError = iota_errors:emit_error(EmptyResults,
+                                         foo,
+                                         {api,
+                                          {functions_in_api_but_not_exported,
+                                           [{bar, 0}]
+                                          }}),
   {setup,
    fun() ->
        Deps = sel_application:start_app(moka),
@@ -33,14 +39,33 @@ internal_consistency_test_() ->
                    iota_api_checks:internal_consistency({foo, [{is_api, false},
                                                                {api, []}]},
                                                         EmptyResults
+                                                       )),
+     ?_assertMatch(EmptyResults,
+                   iota_api_checks:internal_consistency({foo, [{is_api, false},
+                                                               {api, [{foo,1}]
+                                                               }]},
+                                                        EmptyResults
+                                                       )),
+     ?_assertMatch(EmptyResults,
+                   iota_api_checks:internal_consistency({foo, [{is_api, false},
+                                                               {api, all}]},
+                                                        EmptyResults
+                                                       )),
+     ?_assertMatch(ExpectedError,
+                   iota_api_checks:internal_consistency({foo, [{is_api, true},
+                                                               {api, [{bar,0}]}
+                                                              ]},
+                                                        EmptyResults
                                                        ))
-   ]
+     ]
   }.
 
 external_calls_xref_error_test_() ->
   [ ?_assertThrow({error_running_xref, {unknown_constant, "foo"}},
                   iota_utils:with_xref(fun() ->
-                                           iota_api_checks:external_calls({foo, bar},
-                                                                          iota_result:new())
+                                           iota_api_checks:external_calls(
+                                             {foo, bar},
+                                             iota_result:new()
+                                            )
                                        end))
   ].
