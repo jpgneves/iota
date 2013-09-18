@@ -31,9 +31,10 @@
 
 -type check_type() :: atom().
 -type directory()  :: string().
+-type options()    :: [{xref_server, atom()|pid()}].
 
 %% @doc Run the specified checks for the given Path.
--spec check(Type::check_type(), Path::directory(), Options::[{atom(), term()}])
+-spec check(Type::check_type(), Path::directory(), Options::options())
            -> any().
 check(Type, Path, Options) ->
   F = fun(Opts) -> do_check(get_checks(Type),
@@ -53,19 +54,19 @@ do_check(Checkers, Info) ->
   iota_result:format(R).
 
 get_checks(api) ->
-  [fun verify_api/2];
+  [fun verify_api/3];
 get_checks(all) ->
   get_checks(api);
 get_checks(_) ->
   throw(unrecognized_command).
 
-verify_api(Data, Results) ->
+verify_api(Data, Results, Options) ->
   Checks = [ fun iota_api_checks:internal_consistency/2,
              fun iota_api_checks:external_calls/2
            ],
-  do_checks(Data, Checks, Results).
+  do_checks(Data, Checks, Results, Options).
 
-do_checks(Data, Checks, ResultsSoFar) ->
+do_checks(Data, Checks, ResultsSoFar, Options) ->
   lists:foldl(fun(C, R) ->
-                  C(Data, R)
+                  C(Data, R, Options)
               end, ResultsSoFar, Checks).

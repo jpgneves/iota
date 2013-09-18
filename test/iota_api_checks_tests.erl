@@ -27,35 +27,41 @@ internal_consistency_test_() ->
    [ ?_assertMatch(ExpectedWarning,
                    iota_api_checks:internal_consistency({foo, [{is_api, true},
                                                                {api, all}]},
-                                                        EmptyResults
+                                                        EmptyResults,
+                                                        []
                                                        )),
      ?_assertMatch(EmptyResults,
                    iota_api_checks:internal_consistency({foo, [{is_api, true},
                                                                {api, [{foo,1}]}
                                                               ]},
-                                                        EmptyResults
+                                                        EmptyResults,
+                                                        []
                                                        )),
      ?_assertMatch(EmptyResults,
                    iota_api_checks:internal_consistency({foo, [{is_api, false},
                                                                {api, []}]},
-                                                        EmptyResults
+                                                        EmptyResults,
+                                                        []
                                                        )),
      ?_assertMatch(EmptyResults,
                    iota_api_checks:internal_consistency({foo, [{is_api, false},
                                                                {api, [{foo,1}]
                                                                }]},
-                                                        EmptyResults
+                                                        EmptyResults,
+                                                        []
                                                        )),
      ?_assertMatch(EmptyResults,
                    iota_api_checks:internal_consistency({foo, [{is_api, false},
                                                                {api, all}]},
-                                                        EmptyResults
+                                                        EmptyResults,
+                                                        []
                                                        )),
      ?_assertMatch(ExpectedError,
                    iota_api_checks:internal_consistency({foo, [{is_api, true},
                                                                {api, [{bar,0}]}
                                                               ]},
-                                                        EmptyResults
+                                                        EmptyResults,
+                                                        []
                                                        ))
      ]
   }.
@@ -77,7 +83,8 @@ external_calls_no_interapp_calls_test_() ->
    [ ?_assertMatch(EmptyResults,
                    iota_api_checks:external_calls({foo, [{is_api, true},
                                                          {api, all}]},
-                                                  EmptyResults
+                                                  EmptyResults,
+                                                  [{xref_server, iota_xref}]
                                                  ))
    ]
   }.
@@ -107,7 +114,8 @@ external_calls_non_api_module_test_() ->
    [ ?_assertMatch(ExpectedError,
                    iota_api_checks:external_calls({foo, [{is_api, false},
                                                          {api, []}]},
-                                                  EmptyResults
+                                                  EmptyResults,
+                                                  [{xref_server, iota_xref}]
                                                  ))
    ]
   }.
@@ -138,7 +146,8 @@ external_calls_non_api_function_test_() ->
    [ ?_assertMatch(ExpectedError,
                    iota_api_checks:external_calls({foo, [{is_api, true},
                                                          {api, [{herp,0}]}]},
-                                                  EmptyResults
+                                                  EmptyResults,
+                                                  [{xref_server, iota_xref}]
                                                  ))
    ]
   }.
@@ -149,7 +158,8 @@ external_calls_xref_error_test_() ->
                   iota_utils:with_xref(fun(_) ->
                                            iota_api_checks:external_calls(
                                              {foo, bar},
-                                             iota_result:new()
+                                             iota_result:new(),
+                                             [{xref_server, iota_xref}]
                                             )
                                        end, []))
   ].
