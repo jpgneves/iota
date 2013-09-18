@@ -69,7 +69,7 @@ with_xref(XrefServer, Fun, KeepXref) ->
   after
     case KeepXref of
       false -> stop_xref_server();
-      _     -> ok
+      true  -> ok
     end,
     application:unset_env(iota, xref_server)
   end.
