@@ -34,6 +34,7 @@
 -type directory()      :: string().
 -type iota_info_item() :: {module(), term()}.
 -type iota_info()      :: [iota_info_item()].
+-type options()        :: [{xref_server, atom()|pid()}].
 
 %% @doc Scan the given path and extract iota information from BEAM attributes
 %% for all applications found in the path. Additionally, we add information
@@ -42,8 +43,7 @@
 scan(Path) ->
   scan(Path, []).
 
--spec scan(Path::directory(), Options::[{atom(), term()}]) ->
-              [{module(), iota_info()}].
+-spec scan(Path::directory(), Options::options()) -> [{module(), iota_info()}].
 scan(Path, Options) ->
   XrefServer = iota_utils:get(xref_server, Options, iota_xref),
   AbsPath = filename:absname(Path),
@@ -54,8 +54,7 @@ scan(Path, Options) ->
                 case xref:add_application(XrefServer, A, [{warnings, false}]) of
                   {ok, _} = R -> R;
                   {error, _, {application_clash, _}} ->
-                    [App, Prefix | _] = lists:reverse(filename:split(A)),
-                    N = list_to_atom(string:join([Prefix, App], "_")),
+                    N = generate_new_name(A),
                     xref:add_application(XrefServer, A, [{warnings, false},
                                                          {name, N}])
                 end
@@ -85,3 +84,8 @@ get_iota_data(Module) ->
           {false, _}    -> []
         end,
   [{is_api, IsApi}, {api, Api}].
+
+
+generate_new_name(AppPath) ->
+  [App, Prefix | _] = lists:reverse(filename:split(AppPath)),
+  list_to_atom(string:join([Prefix, App], "_")).
