@@ -60,6 +60,90 @@ internal_consistency_test_() ->
      ]
   }.
 
+external_calls_no_interapp_calls_test_() ->
+  EmptyResults = iota_result:new(),
+  {setup,
+   fun() ->
+       Deps = sel_application:start_app(moka),
+       Moka = moka:start(iota_api_checks),
+       moka:replace(Moka, xref, q, fun(iota_xref, _) -> {ok, []} end),
+       moka:load(Moka),
+       {Moka, Deps}
+   end,
+   fun({Moka, Deps}) ->
+       moka:stop(Moka),
+       sel_application:stop_apps(Deps)
+   end,
+   [ ?_assertMatch(EmptyResults,
+                   iota_api_checks:external_calls({foo, [{is_api, true},
+                                                         {api, all}]},
+                                                  EmptyResults
+                                                 ))
+   ]
+  }.
+
+external_calls_non_api_module_test_() ->
+  EmptyResults = iota_result:new(),
+  ExpectedError = iota_errors:emit_error(EmptyResults,
+                                         {bar, baz, 1},
+                                         {api,
+                                          {call_to_non_api_module, foo}
+                                         }),
+  {setup,
+   fun() ->
+       Deps = sel_application:start_app(moka),
+       Moka = moka:start(iota_api_checks),
+       moka:replace(Moka, xref, q, fun(iota_xref, _) -> {ok, [{{bar, baz, 1},
+                                                               {foo, bar, 1}
+                                                              }
+                                                             ]} end),
+       moka:load(Moka),
+       {Moka, Deps}
+   end,
+   fun({Moka, Deps}) ->
+       moka:stop(Moka),
+       sel_application:stop_apps(Deps)
+   end,
+   [ ?_assertMatch(ExpectedError,
+                   iota_api_checks:external_calls({foo, [{is_api, false},
+                                                         {api, []}]},
+                                                  EmptyResults
+                                                 ))
+   ]
+  }.
+
+external_calls_non_api_function_test_() ->
+  EmptyResults = iota_result:new(),
+  ExpectedError = iota_errors:emit_error(EmptyResults,
+                                         {bar, baz, 1},
+                                         {api,
+                                          {call_to_non_api_function,
+                                           {foo, bar, 1}}
+                                         }),
+  {setup,
+   fun() ->
+       Deps = sel_application:start_app(moka),
+       Moka = moka:start(iota_api_checks),
+       moka:replace(Moka, xref, q, fun(iota_xref, _) -> {ok, [{{bar, baz, 1},
+                                                               {foo, bar, 1}
+                                                              }
+                                                             ]} end),
+       moka:load(Moka),
+       {Moka, Deps}
+   end,
+   fun({Moka, Deps}) ->
+       moka:stop(Moka),
+       sel_application:stop_apps(Deps)
+   end,
+   [ ?_assertMatch(ExpectedError,
+                   iota_api_checks:external_calls({foo, [{is_api, true},
+                                                         {api, [{herp,0}]}]},
+                                                  EmptyResults
+                                                 ))
+   ]
+  }.
+
+
 external_calls_xref_error_test_() ->
   [ ?_assertThrow({error_running_xref, {unknown_constant, "foo"}},
                   iota_utils:with_xref(fun() ->

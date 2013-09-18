@@ -69,3 +69,10 @@ Future work
 declarations)
 * Add support for whitelisting applications (i.e for applications which will
 never have iota annotations)
+
+NOTE
+====
+
+When running ```make test``` you'll see that the coverage of some modules is
+very low. This is due to the use of
+[moka](https://github.com/samuelrivas/moka) for mocking.
