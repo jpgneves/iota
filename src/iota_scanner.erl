@@ -27,25 +27,19 @@
 
 -module(iota_scanner).
 
--export([ scan/1,
-          scan/2
+-export([ scan/1
         ]).
 
 -type directory()      :: string().
 -type iota_info_item() :: {module(), term()}.
 -type iota_info()      :: [iota_info_item()].
--type options()        :: [{xref_server, atom()|pid()}].
 
 %% @doc Scan the given path and extract iota information from BEAM attributes
 %% for all applications found in the path. Additionally, we add information
 %% for all applications found in the iota xref server.
 -spec scan(Path::directory()) -> [{module(), iota_info()}].
 scan(Path) ->
-  scan(Path, []).
-
--spec scan(Path::directory(), Options::options()) -> [{module(), iota_info()}].
-scan(Path, Options) ->
-  XrefServer = iota_utils:get(xref_server, Options, iota_xref),
+  XrefServer = iota_utils:get_xref_server(),
   AbsPath = filename:absname(Path),
   Apps = [AbsPath | [filename:join([AbsPath, "lib", L])
                      || L <- filelib:wildcard("*",

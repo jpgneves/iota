@@ -29,6 +29,9 @@
 
 -export([ get/2,
           get/3,
+          get_xref_server/0,
+          start_xref_server/1,
+          stop_xref_server/0,
           with_xref/2
         ]).
 
@@ -50,11 +53,36 @@ get(Key, List, Default) ->
 
 %% @doc Run Fun with an xref server started and terminate the xref server
 %% afterwards.
--spec with_xref(Fun::fun(), ExtraArgs::[{atom(), term()}]) -> any().
-with_xref(Fun, ExtraArgs) ->
-  xref:start(iota_xref),
+-spec with_xref(XrefServer::pid()|atom(), Fun::fun()) -> any().
+with_xref(XrefServer, Fun) ->
+  start_xref_server(XrefServer),
   try
-    Fun(ExtraArgs)
+    Fun()
   after
-    xref:stop(iota_xref)
+    stop_xref_server(),
+    application:unset_env(iota, xref_server)
   end.
+
+get_xref_server() ->
+  {ok, XrefServer} = application:get_env(iota, xref_server),
+  XrefServer.
+
+start_xref_server(XrefServer) ->
+  Server = maybe_start_xref_server(XrefServer),
+  application:set_env(iota, xref_server, Server).
+
+maybe_start_xref_server(XrefServer) when is_pid(XrefServer) ->
+  XrefServer;
+maybe_start_xref_server(XrefServer) ->
+  case whereis(XrefServer) of
+    undefined -> {ok, _} = xref:start(XrefServer);
+    _         -> ok
+  end,
+  XrefServer.
+
+stop_xref_server() ->
+  case application:get_env(iota, xref_server) of
+    undefined    -> ok;
+    {ok, Server} -> xref:stop(Server)
+  end,
+  ok.
