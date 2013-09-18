@@ -27,36 +27,36 @@
 
 -module(iota_core).
 
--export([ check/3 ]).
--api([ check/3 ]).
+-export([ run/3 ]).
+-api([ run/3 ]).
 
--type check_type() :: atom().
--type directory()  :: string().
--type options()    :: [{xref_server, atom()|pid()}].
+-type command()   :: atom().
+-type directory() :: string().
+-type options()   :: [{xref_server, atom()|pid()}].
 
-%% @doc Run the specified checks for the given Path.
--spec check(Type::check_type(), Path::directory(), Options::options())
+%% @doc Run the specified command for the given Path.
+-spec run(Type::command(), Path::directory(), Options::options())
            -> any().
-check(Type, Path, Options) ->
+run(Type, Path, Options) ->
   iota_utils:with_xref(iota_utils:get(xref_server, Options, iota_xref),
                        fun() ->
-                           do_check(get_checks(Type),
+                           do_run(get_steps(Type),
                                     iota_scanner:scan(Path))
                        end).
 
-do_check(Checkers, Info) ->
+do_run(Checkers, Info) ->
   R = lists:foldl(fun(I, Acc) ->
-                    lists:foldl(fun(C, Acc2) ->
-                                    C(I, Acc2)
-                                end, Acc, Checkers)
-                end, iota_result:new(), Info),
-  iota_result:format(R).
+                      lists:foldl(fun(C, Acc2) ->
+                                      C(I, Acc2)
+                                  end, Acc, Checkers)
+                  end, iota_result:new(), Info),
+  iota_result:to_list(R).
 
-get_checks(api) ->
+get_steps('describe-api') ->
+  [fun describe_api/2];
+get_steps(all) ->
   [fun verify_api/2];
-get_checks(all) ->
-  get_checks(api);
-get_checks(_) ->
+get_steps(_) ->
   throw(unrecognized_command).
 
 verify_api(Data, Results) ->
@@ -64,6 +64,9 @@ verify_api(Data, Results) ->
              fun iota_api_checks:external_calls/2
            ],
   do_checks(Data, Checks, Results).
+
+describe_api(Data, Results) ->
+  iota_api_checks:describe_api(Data, Results).
 
 do_checks(Data, Checks, ResultsSoFar) ->
   lists:foldl(fun(C, R) ->

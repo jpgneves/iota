@@ -14,11 +14,10 @@ add_warning_test_() ->
   [ ?_assertEqual(WarningResult, iota_result:add_warning(foo, foo, iota_result:new())) ].
 
 lookup_test_() ->
-  WElementResult = iota_result:add_warning(foo, bar, iota_result:new()),
-  EElementResult = iota_result:add_error(foo, bar, iota_result:new()),
-  [ ?_assertEqual({{errors, []}, {warnings, []}}, iota_result:lookup(foo, iota_result:new())),
-    ?_assertEqual({{errors, [bar]}, {warnings, []}},
-                  iota_result:lookup(foo, EElementResult)),
-    ?_assertEqual({{errors, []}, {warnings, [bar]}},
-                  iota_result:lookup(foo, WElementResult))
+  DefaultElement = [derp],
+  ElementResult = iota_result:add_info(foo, bar, iota_result:new()),
+  [ ?_assertEqual([], iota_result:lookup(foo, iota_result:new())),
+    ?_assertEqual([bar], iota_result:lookup(foo, ElementResult)),
+    ?_assertEqual([derp],
+                  iota_result:lookup(herp, ElementResult, DefaultElement))
   ].

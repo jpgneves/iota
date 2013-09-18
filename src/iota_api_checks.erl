@@ -28,9 +28,23 @@
 
 -module(iota_api_checks).
 
--export([ internal_consistency/2,
+-export([ describe_api/2,
+          internal_consistency/2,
           external_calls/2
         ]).
+
+-spec describe_api(Data::iota_scanner:iota_info_item(),
+                   Results::iota_result:iota_result())
+                  -> iota_result:iota_result().
+describe_api({Module, Info}, Results) ->
+  Query = iota_utils:format_xref_query("(App) ~p", [Module]),
+  XrefServer = iota_utils:get_xref_server(),
+  {ok, [Application]} = xref:q(XrefServer, Query),
+  case {iota_utils:get(is_api, Info), iota_utils:get(api, Info)} of
+    {true, all}   -> iota_result:add_info(Application, get_exports(Module), Results);
+    {true, Api}   -> iota_result:add_info(Application, Api, Results);
+    {false, _}    -> Results
+  end.
 
 %% @doc Perform internal consistency checks on a module. Checks if the
 %% declared API is a subset of the exported functions for a module
@@ -53,10 +67,9 @@ internal_consistency(Data, Results) ->
                      Results::iota_result:iota_result())
                     -> iota_result:iota_result().
 external_calls({Module, _Info} = Data, Results) ->
-  Query   = lists:flatten(
-              io_lib:format(
-                "(Fun) ((App) (XC || ~p : Mod) - (App) (AE - strict AE))",
-                [Module])),
+  Query = iota_utils:format_xref_query(
+            "(Fun) ((App) (XC || ~p : Mod) - (App) (AE - strict AE))",
+            [Module]),
   XrefServer = iota_utils:get_xref_server(),
   case xref:q(XrefServer, Query) of
     {ok, R} -> verify_external_calls(R, Data, Results);
@@ -90,8 +103,6 @@ unexported_api_check({Module, Info}, Results) ->
 
 get_exports(Module) ->
   Module:module_info(exports).
-
-
 
 verify_external_calls([], _, Results) ->
   Results;

@@ -29,9 +29,11 @@
 
 -export([ add_error/3,
           add_warning/3,
+          add_info/3,
           new/0,
-          format/1,
-          lookup/2
+          to_list/1,
+          lookup/2,
+          lookup/3
         ]).
 -api([ lookup/2 ]).
 
@@ -42,42 +44,44 @@
 -spec new() -> iota_result().
 new() -> orddict:new().
 
-%% @doc Lookup results for a module in the results
--spec lookup(Module::module(), Results::iota_result()) -> result_info().
-lookup(Module, Results) ->
-  case orddict:find(Module, Results) of
+%% @doc Lookup for a key in the results
+-spec lookup(Key::term(), Results::iota_result()) -> result_info() | term().
+lookup(Key, Results) ->
+  lookup(Key, Results, []).
+
+-spec lookup(Key::term(), Results::iota_result(), Default::term())
+            -> result_info() | term().
+lookup(Key, Results, Default) ->
+  case orddict:find(Key, Results) of
     {ok, Value} -> Value;
-    error       -> {{errors, []}, {warnings, []}}
+    error       -> Default
   end.
 
-%% @doc Print the result to stdout.
--spec format(Results::iota_result()) -> ok.
-format(Results) ->
-  io:format("===== iota report =====~n"),
-  F = fun({K, {{errors, E}, {warnings, W}}}, {AccE, AccW}) ->
-          NewE = length(E),
-          NewW = length(W),
-          io:format("~p - Errors: ~p, Warnings: ~p~n", [K, NewE, NewW]),
-          {AccE + NewE, AccW + NewW}
-      end,
-  L = orddict:to_list(Results),
-  {TotalE, TotalW} = lists:foldl(F, {0, 0}, L),
-  io:format("=======================~nTotal - Errors:~p Warnings:~p~n",
-            [TotalE, TotalW]).
+%% @doc Return the results as a list
+-spec to_list(Results::iota_result()) -> [{atom(), term()}].
+to_list(Results) ->
+  orddict:to_list(Results).
 
 %% @doc Add a Warning to the results for ModuleName.
 -spec add_warning(ModuleName::module(), Warning::iota_errors:warning(),
                   Results::iota_result()) -> iota_result().
 add_warning(ModuleName, Warning, Results) ->
-  Entry = lookup(ModuleName, Results),
+  Entry = lookup(ModuleName, Results, {{errors, []}, {warnings, []}}),
   orddict:store(ModuleName, insert(warnings, Warning, Entry), Results).
 
 %% @doc Add an Error to the results for ModuleName.
 -spec add_error(ModuleName::module(), Warning::iota_errors:error(),
                 Results::iota_result()) -> iota_result().
 add_error(ModuleName, Error, Results) ->
-  Entry = lookup(ModuleName, Results),
+  Entry = lookup(ModuleName, Results, {{errors, []}, {warnings, []}}),
   orddict:store(ModuleName, insert(errors, Error, Entry), Results).
+
+%% @doc Add an entry to the results for Key.
+-spec add_info(Key::term(), Info::term(), Results::iota_result())
+              -> iota_result().
+add_info(Key, Info, Results) ->
+  Entry = lookup(Key, Results),
+  orddict:store(Key, [Info | Entry], Results).
 
 insert(warnings, Warning, {E, {warnings, W}}) ->
   {E, {warnings, [Warning | W]}};

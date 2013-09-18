@@ -33,27 +33,55 @@
 -spec main([string()]) -> ok | unrecognized_command.
 main(["help" | _ ]) ->
   print_help();
-main([Check, ProjectPath | _]) ->
-  handle_result(run(Check, ProjectPath));
-main([Check | _]) ->
+main(["all" | _]) ->
   {ok, Cwd} = file:get_cwd(),
-  handle_result(run(Check, Cwd));
+  handle_result("all", run("all", Cwd));
+main(["describe-api" | _]) ->
+  {ok, Cwd} = file:get_cwd(),
+  handle_result("describe-api", run("describe-api", Cwd));
+main([ProjectPath, Cmd | _]) ->
+  handle_result(Cmd, run(Cmd, ProjectPath));
+main([ProjectPath | _]) ->
+  handle_result("all", run("all", ProjectPath));
 main([]) ->
   {ok, Cwd} = file:get_cwd(),
-  handle_result(run("all", Cwd)).
+  handle_result("all", run("all", Cwd)).
 
-run(Check, Path) ->
+run(Command, Path) ->
   try
-    iota_core:check(list_to_atom(Check), Path, [{xref_server, iota_xref}])
+    iota_core:run(list_to_atom(Command), Path, [{xref_server, iota_xref}])
   catch
     throw:unrecognized_command -> print_help(),
                                   unrecognized_command
   end.
 
-handle_result(ok) -> ok;
-handle_result(unrecognized_command) -> halt(1).
+handle_result(_, unrecognized_command) -> halt(1);
+handle_result("all", Result)           -> format_check(Result);
+handle_result("describe-api", Result)  -> format_describe(Result).
 
 print_help() ->
-  io:format("usage: iota CHECK [PATH]~n~n  CHECK can be one of the following:~n"
-            "    api   - check for api violations~n"
-            "    all   - check for all types of violations (default)~n").
+  io:format("usage: iota [PATH] [CMD]~n~n  CMD can be one of the following:~n"
+            "    all      - check for all types of violations (default)~n"
+            "    describe-api - describe the API of all applications").
+
+format_describe(Result) ->
+  print_report_header(),
+  F = fun({App, Api}) ->
+          io:format("API for ~p:~n  ~p~n", [App, lists:flatten(Api)])
+      end,
+  lists:map(F, Result).
+
+format_check(Result) ->
+  print_report_header(),
+  F = fun({K, {{errors, E}, {warnings, W}}}, {AccE, AccW}) ->
+          NewE = length(E),
+          NewW = length(W),
+          io:format("~p - Errors: ~p, Warnings: ~p~n", [K, NewE, NewW]),
+          {AccE + NewE, AccW + NewW}
+      end,
+  {TotalE, TotalW} = lists:foldl(F, {0, 0}, Result),
+  io:format("=======================~nTotal - Errors:~p Warnings:~p~n",
+            [TotalE, TotalW]).
+
+print_report_header() ->
+  io:format("===== iota report =====~n").

@@ -27,7 +27,8 @@
 
 -module(iota_utils).
 
--export([ get/2,
+-export([ format_xref_query/2,
+          get/2,
           get/3,
           get_xref_server/0,
           start_xref_server/1,
@@ -97,6 +98,11 @@ stop_xref_server() ->
     {ok, Server} -> xref:stop(Server)
   end,
   ok.
+
+%% @doc Format an xref query.
+-spec format_xref_query(Format::string(), Args::[term()]) -> string().
+format_xref_query(Format, Args) ->
+  lists:flatten(io_lib:format(Format, Args)).
 
 maybe_start_xref_server(XrefServer) when is_pid(XrefServer) ->
   XrefServer;

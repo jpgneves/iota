@@ -14,17 +14,15 @@ A module can be declared as an API module for an application (meaning it's
 a module other applications should invoke for functionality) in two ways.
 
 You can explicitly declare the entire module as an API:
-
-    ...
-    -api(all). %% Declares all exported functions as part of the module's API.
-    ...
+```erlang
+-api(all). %% Declares all exported functions as part of the module's API.
+```
 
 or you can declare which exported functions are part of the API:
-
-    ...
-    -export([ foo/1, bar/0 ]).
-    -api([ foo/1 ]). %% Declares only foo/1 as part of the module's API.
-    ...
+```erlang
+-export([ foo/1, bar/0 ]).
+-api([ foo/1 ]). %% Declares only foo/1 as part of the module's API.
+```
 
 Declaring the API functions implicitly declares the module as an API module,
 and only declaring the module as an API module implicitly declares all
@@ -43,15 +41,30 @@ as API or not.
 Running iota
 ============
 
-You can run iota simply by doing:
+You can run iota simply by doing (all examples use the applications provided
+in ```priv```):
 
     $ make escriptize
-    $ ./iota all <path_to_your_application>
+    $ ./iota priv/test_app1
+    ERROR: test_app2_mod:baz/0 calls non-API function test_app1_mod:xpto/2
+
+    ERROR: test_app1_mod:foo/0 calls non-API module test_app2_mod
+
+    ===== iota report =====
+    {test_app1_mod,foo,0} - Errors: 1, Warnings: 0
+    {test_app2_mod,baz,0} - Errors: 1, Warnings: 0
+    =======================
+    Total - Errors:2 Warnings:0
 
 Please note that your application must be compiled before, as iota uses xref for the more
 meaningful checks and your declarations need to be baked in as well. :)
 
-A sample application is provided in ```priv```.
+You can also ask iota to describe the API of an application for you:
+
+    $ ./iota priv/test_app1 describe-api
+    ===== iota report =====
+    API for test_app1:
+      [{xpto,1}]
 
 Future work
 ===========
