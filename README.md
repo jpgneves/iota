@@ -59,12 +59,15 @@ in ```priv```):
 Please note that your application must be compiled before, as iota uses xref for the more
 meaningful checks and your declarations need to be baked in as well. :)
 
-You can also ask iota to describe the API of an application for you:
+You can also ask iota to describe the API of all applications on the given path
+for you:
 
     $ ./iota priv/test_app1 describe-api
     ===== iota report =====
     API for test_app1:
       [{xpto,1}]
+    API for test_app2:
+      []
 
 Future work
 ===========

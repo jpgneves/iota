@@ -43,7 +43,7 @@ describe_api({Module, Info}, Results) ->
   case {iota_utils:get(is_api, Info), iota_utils:get(api, Info)} of
     {true, all}   -> iota_result:add_info(Application, get_exports(Module), Results);
     {true, Api}   -> iota_result:add_info(Application, Api, Results);
-    {false, _}    -> Results
+    {false, _}    -> iota_result:add_info(Application, [], Results)
   end.
 
 %% @doc Perform internal consistency checks on a module. Checks if the

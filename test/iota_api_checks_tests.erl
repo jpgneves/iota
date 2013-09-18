@@ -2,6 +2,48 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
+describe_api_test_() ->
+  EmptyResults   = iota_result:new(),
+  NotApiResults  = iota_result:add_info(bar, [], EmptyResults),
+  SomeApiResults = iota_result:add_info(bar, [{herp,0},{derp,1}], EmptyResults),
+  FullApiResults = iota_result:add_info(bar, [{herp,0},{derp,1},{blah,2}],
+                                        EmptyResults),
+  {setup,
+   fun() ->
+       Deps = sel_application:start_app(moka),
+       Moka = moka:start(iota_api_checks),
+       moka:replace(Moka, xref, q, fun(test_xref, _) -> {ok, [bar]} end),
+       moka:replace(Moka, get_exports, fun(_) ->
+                                           [{herp,0},{derp,1},{blah,2}]
+                                       end),
+       moka:load(Moka),
+       iota_utils:start_xref_server(test_xref),
+       {Moka, Deps}
+   end,
+   fun({Moka, Deps}) ->
+       moka:stop(Moka),
+       iota_utils:stop_xref_server(),
+       sel_application:stop_apps(Deps)
+   end,
+   [ ?_assertMatch(NotApiResults,
+                   iota_api_checks:describe_api({foo, [{is_api, false},
+                                                       {api, blah}]},
+                                                EmptyResults
+                                               )),
+     ?_assertMatch(SomeApiResults,
+                   iota_api_checks:describe_api({foo, [{is_api, true},
+                                                       {api, [{herp,0},
+                                                              {derp,1}]}]},
+                                                EmptyResults
+                                               )),
+     ?_assertMatch(FullApiResults,
+                   iota_api_checks:describe_api({foo, [{is_api, true},
+                                                       {api, all}]},
+                                                EmptyResults
+                                               ))
+   ]
+  }.
+
 internal_consistency_test_() ->
   EmptyResults = iota_result:new(),
   ExpectedWarning = iota_errors:emit_warning(EmptyResults,
