@@ -16,7 +16,7 @@ lookup(Module, Results) ->
   end.
 
 format(Results) ->
-  io:format("===== IOTA results =====~n"),
+  io:format("===== iota report =====~n"),
   F = fun({K, {{errors, E}, {warnings, W}}}, {AccE, AccW}) ->
           NewE = length(E),
           NewW = length(W),
