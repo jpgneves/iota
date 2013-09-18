@@ -1,13 +1,15 @@
 .PHONY: test eunit ct clean
 
-all: escriptize
+all: compile
 
-compile:
+compile: get-deps
 	./rebar compile
 
 escriptize: compile
-	./rebar escriptize
+	./rebar escriptize skip_deps=true
 
+get-deps:
+	./rebar get-deps
 
 test: eunit ct
 
@@ -18,4 +20,4 @@ ct: compile
 	./rebar ct skip_deps=true
 
 clean:
-	rm -rf iota ebin .eunit
+	rm -rf iota ebin .eunit deps
