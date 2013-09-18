@@ -20,4 +20,5 @@ ct: compile
 	./rebar ct skip_deps=true
 
 clean:
-	rm -rf iota ebin .eunit deps
+	./rebar clean
+	rm -rf iota .eunit
