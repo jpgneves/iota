@@ -20,7 +20,7 @@ unrestricted_api_check({Module, Info}, Results) ->
   end.
 
 unexported_api_check({Module, Info}, Results) ->
-  Exports = Module:module_info(exports),
+  Exports = get_exports(Module),
   Api = case iota_utils:get(api, Info) of
           all  -> Exports;
           List -> List
@@ -34,6 +34,9 @@ unexported_api_check({Module, Info}, Results) ->
                                            UnexportedApi}});
     true  -> Results
   end.
+
+get_exports(Module) ->
+  Module:module_info(exports).
 
 external_calls({Module, _Info} = Data, Results) ->
   Query   = lists:flatten(
