@@ -69,14 +69,25 @@ for you:
     API for test_app2:
       []
 
+Whitelisting applications
+-------------------------
+
+It's possible to whitelist applications from the checks, for applications
+that do not and will not have iota annotations (e.g. third-party libraries).
+
+To do so, in the root of your top-level application, create a
+```iota.config``` file and include the following:
+```erlang
+{ignore_applications, [app1, app2]}.
+```
+where ```[app1, app2]``` are the applications you wish to whitelist.
+
 Future work
 -----------
 
 * Improve internal consistency analysis
 * Add support for more kinds of checking (e.g. layer checks through external
 declarations)
-* Add support for whitelisting applications (i.e for applications which will
-never have iota annotations)
 * Make lib_dirs configurable, it now defaults to /path/to/app/lib
 
 NOTE
