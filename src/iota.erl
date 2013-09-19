@@ -40,9 +40,15 @@ main(Args) ->
   end.
 
 start(ParsedOpts) ->
-  Path = get_path(ParsedOpts),
-  Cmd  = get_command(ParsedOpts),
-  handle_result(Cmd, run(Cmd, Path)).
+  case is_help(ParsedOpts) of
+    true  -> print_doc();
+    false -> Path = get_path(ParsedOpts),
+             Cmd  = get_command(ParsedOpts),
+             handle_result(Cmd, run(Cmd, Path))
+  end.
+
+is_help(Opts) ->
+  orddict:fetch("--help", Opts).
 
 get_path(Opts) ->
   case orddict:fetch("<path>", Opts) of
