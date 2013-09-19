@@ -50,10 +50,9 @@ main([]) ->
 run(Command, Path) ->
   try
     Config  = read_config(Path),
-    Ignores = iota_utils:get(ignore_applications, Config, []),
-    iota_core:run(list_to_atom(Command), Path, [{xref_server, iota_xref},
-                                                {ignore_apps, Ignores}
-                                               ])
+    iota_core:run(list_to_atom(Command), Path, [{xref_server, iota_xref}
+                                                | Config]
+                 )
   catch
     throw:unrecognized_command -> print_help(),
                                   unrecognized_command

@@ -78,17 +78,26 @@ that do not and will not have iota annotations (e.g. third-party libraries).
 To do so, in the root of your top-level application, create a
 ```iota.config``` file and include the following:
 ```erlang
-{ignore_applications, [app1, app2]}.
+{ignore_apps, [app1, app2]}.
 ```
 where ```[app1, app2]``` are the applications you wish to whitelist.
+
+Setting library path
+--------------------
+
+In your ```iota.config``` file, use the following to set your library path:
+```erlang
+{lib_dirs, ["deps"]}.
+```
+
+If not set, ```lib_dirs``` defaults to ```/path/to/app/lib```.
 
 Future work
 -----------
 
-* Improve internal consistency analysis
 * Add support for more kinds of checking (e.g. layer checks through external
 declarations)
-* Make lib_dirs configurable, it now defaults to /path/to/app/lib
+
 
 NOTE
 ----
