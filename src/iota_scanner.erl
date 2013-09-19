@@ -28,6 +28,7 @@
 -module(iota_scanner).
 
 -export([ scan/1
+        , scan/2
         ]).
 
 -type directory()      :: string().
@@ -39,9 +40,17 @@
 %% for all applications found in the iota xref server.
 -spec scan(Path::directory()) -> [{module(), iota_info()}].
 scan(Path) ->
+  scan(Path, []).
+
+%% @doc Scan the given path and extract iota information from BEAM attributes
+%% for all applications found in the path. Additionally, we add information
+%% for all applications found in the iota xref server.
+-spec scan(Path::directory(), Options::iota_core:options())
+          -> [{module(), iota_info()}].
+scan(Path, Options) ->
   XrefServer = iota_utils:get_xref_server(),
   AbsPath = filename:absname(Path),
-  Apps = get_applications(AbsPath),
+  Apps = get_applications(AbsPath, Options),
   lists:map(fun(A) ->
                 case xref:add_application(XrefServer, A, [{warnings, false}]) of
                   {ok, _} = R -> R;
@@ -82,7 +91,10 @@ generate_new_name(AppPath) ->
   [App, Prefix | _] = lists:reverse(filename:split(AppPath)),
   list_to_atom(string:join([Prefix, App], "_")).
 
-get_applications(AbsPath) ->
-  [AbsPath | [filename:join([AbsPath, "lib", L])
-              || L <- filelib:wildcard("*",
-                                       filename:join(AbsPath, "lib"))]].
+get_applications(AbsPath, Options) ->
+  LibDirs = iota_utils:get(lib_dirs, Options,
+                           [filename:join([AbsPath, "lib"])]),
+  lists:foldl(fun(P, Acc) ->
+                  [Acc | [filename:join([P, L])
+                          || L <- filelib:wildcard("*", P)]]
+              end, [AbsPath], LibDirs).

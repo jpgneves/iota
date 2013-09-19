@@ -46,7 +46,7 @@ scan_duplicate_application_name_test_() ->
                                                               {name, a_b}]) ->
                                                      {ok, foo}
                                                  end),
-       moka:replace(Moka, get_applications, fun(_) -> ["a/b"] end),
+       moka:replace(Moka, get_applications, fun(_,_) -> ["a/b"] end),
        moka:load(Moka),
        {Moka, Deps}
    end,
