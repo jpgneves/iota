@@ -38,14 +38,15 @@ scan_duplicate_application_name_test_() ->
    fun() ->
        Deps = sel_application:start_app(moka),
        Moka = moka:start(iota_scanner),
-       moka:replace(Moka, xref, add_application, fun(_, "a/b", [{warnings, false}]) ->
-                                                     {error, foo,
-                                                      {application_clash, dummy}
-                                                     };
-                                                    (_, "a/b", [{warnings, false},
-                                                              {name, a_b}]) ->
-                                                     {ok, foo}
-                                                 end),
+       moka:replace(Moka, xref, add_application,
+                    fun(_, "a/b", [{warnings, false}]) ->
+                        {error, foo,
+                         {application_clash, dummy}
+                        };
+                       (_, "a/b", [{warnings, false},
+                                   {name, a_b}]) ->
+                        {ok, foo}
+                    end),
        moka:replace(Moka, get_applications, fun(_,_) -> ["a/b"] end),
        moka:load(Moka),
        {Moka, Deps}
