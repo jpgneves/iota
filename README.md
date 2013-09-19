@@ -45,7 +45,7 @@ You can run iota simply by doing (all examples use the applications provided
 in ```priv```):
 
     $ make escriptize
-    $ ./iota priv/test_app1
+    $ ./iota check priv/test_app1
     ERROR: test_app2_mod:baz/0 calls non-API function test_app1_mod:xpto/2
 
     ERROR: test_app1_mod:foo/0 calls non-API module test_app2_mod
@@ -62,7 +62,7 @@ meaningful checks and your declarations need to be baked in as well. :)
 You can also ask iota to describe the API of all applications on the given path
 for you:
 
-    $ ./iota priv/test_app1 describe-api
+    $ ./iota describe_api priv/test_app1
     ===== iota report =====
     API for test_app1:
       [{test_app1_mod,xpto,1}]

@@ -31,21 +31,34 @@
 -export([ main/1 ]).
 
 -spec main([string()]) -> ok | unrecognized_command.
-main(["help" | _ ]) ->
-  print_help();
-main(["check" | _]) ->
-  {ok, Cwd} = file:get_cwd(),
-  handle_result("check", run("check", Cwd));
-main(["describe-api" | _]) ->
-  {ok, Cwd} = file:get_cwd(),
-  handle_result("describe-api", run("describe-api", Cwd));
-main([ProjectPath, Cmd | _]) ->
-  handle_result(Cmd, run(Cmd, ProjectPath));
-main([ProjectPath | _]) ->
-  handle_result("check", run("check", ProjectPath));
-main([]) ->
-  {ok, Cwd} = file:get_cwd(),
-  handle_result("check", run("check", Cwd)).
+main(Args) ->
+  try docopt:docopt(doc(), string:join(Args, " ")) of
+      Out -> start(Out)
+  catch
+    _:_ -> print_doc(),
+           halt(1)
+  end.
+
+start(ParsedOpts) ->
+  Path = get_path(ParsedOpts),
+  Cmd  = get_command(ParsedOpts),
+  handle_result(Cmd, run(Cmd, Path)).
+
+get_path(Opts) ->
+  case orddict:fetch("<path>", Opts) of
+    undefined -> {ok, Cwd} = file:get_cwd(),
+                 Cwd;
+    Val       -> Val
+  end.
+
+get_command(Opts) ->
+  Commands = ["check", "describe_api"],
+  Default  = "check",
+  Pred     = fun(C) -> orddict:fetch(C, Opts) =:= true end,
+  case lists:filter(Pred, Commands) of
+    [Cmd] -> Cmd;
+    []    -> Default
+  end.
 
 run(Command, Path) ->
   try
@@ -54,14 +67,14 @@ run(Command, Path) ->
                                                 | Config]
                  )
   catch
-    throw:unrecognized_command -> print_help(),
+    throw:unrecognized_command -> print_doc(),
                                   unrecognized_command
   end.
 
 handle_result(_, unrecognized_command) -> halt(1);
 handle_result("check", Result)         -> format_check(Result),
                                           return_code(Result);
-handle_result("describe-api", Result)  -> format_describe(Result),
+handle_result("describe_api", Result)  -> format_describe(Result),
                                           return_code(Result).
 
 read_config(Path) ->
@@ -75,10 +88,19 @@ return_code([]) ->
 return_code(_) ->
   halt(1).
 
-print_help() ->
-  io:format("usage: iota [PATH] [CMD]~n~n  CMD can be one of the following:~n"
-            "    check        - check for all types of violations (default)~n"
-            "    describe-api - describe the API of all applications").
+print_doc() ->
+  io:format("~s", [doc()]).
+
+doc() ->
+  lists:flatten(
+    io_lib:format(
+      "iota - A tool to help enforcing clean separation of responsabilities~n"
+      "Usage:~n"
+      "  iota (check | describe_api) [<path>]~n"
+      "  iota -h | --help~n~n"
+      "Options:~n"
+      " -h --help         Show this screen~n",
+     [])).
 
 format_describe(Result) ->
   print_report_header(),

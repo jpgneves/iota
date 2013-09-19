@@ -52,7 +52,7 @@ do_run(Checkers, Info) ->
                   end, iota_result:new(), Info),
   iota_result:to_list(R).
 
-get_steps('describe-api') ->
+get_steps(describe_api) ->
   [fun describe_api/2];
 get_steps(check) ->
   [fun verify_api/2];
