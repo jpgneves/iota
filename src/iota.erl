@@ -49,7 +49,11 @@ main([]) ->
 
 run(Command, Path) ->
   try
-    iota_core:run(list_to_atom(Command), Path, [{xref_server, iota_xref}])
+    Config  = read_config(Path),
+    Ignores = iota_utils:get(ignore_applications, Config, []),
+    iota_core:run(list_to_atom(Command), Path, [{xref_server, iota_xref},
+                                                {ignore_apps, Ignores}
+                                               ])
   catch
     throw:unrecognized_command -> print_help(),
                                   unrecognized_command
@@ -58,6 +62,12 @@ run(Command, Path) ->
 handle_result(_, unrecognized_command) -> halt(1);
 handle_result("check", Result)         -> format_check(Result);
 handle_result("describe-api", Result)  -> format_describe(Result).
+
+read_config(Path) ->
+  case file:consult(filename:join(Path, "iota.config")) of
+    {ok, Terms} -> Terms;
+    {error, _}  -> []
+  end.
 
 print_help() ->
   io:format("usage: iota [PATH] [CMD]~n~n  CMD can be one of the following:~n"

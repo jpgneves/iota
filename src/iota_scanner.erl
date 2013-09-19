@@ -92,9 +92,12 @@ generate_new_name(AppPath) ->
   list_to_atom(string:join([Prefix, App], "_")).
 
 get_applications(AbsPath, Options) ->
-  LibDirs = iota_utils:get(lib_dirs, Options,
+  LibDirs    = iota_utils:get(lib_dirs, Options,
                            [filename:join([AbsPath, "lib"])]),
+  Ignores    = iota_utils:get(ignore_apps, Options, []),
+  IgnoreDirs = [filename:join(L, atom_to_list(I))
+                || I <- Ignores, L <- LibDirs],
   lists:foldl(fun(P, Acc) ->
                   [Acc | [filename:join([P, L])
                           || L <- filelib:wildcard("*", P)]]
-              end, [AbsPath], LibDirs).
+              end, AbsPath, LibDirs) -- IgnoreDirs.

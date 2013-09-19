@@ -32,7 +32,7 @@
 
 -type command()   :: atom().
 -type directory() :: string().
--type options()   :: [{xref_server, atom()|pid()}].
+-type options()   :: [{xref_server, atom()|pid()}|{ignore_apps, [term()]}].
 
 %% @doc Run the specified command for the given Path.
 -spec run(Type::command(), Path::directory(), Options::options())
@@ -41,7 +41,7 @@ run(Type, Path, Options) ->
   iota_utils:with_xref(iota_utils:get(xref_server, Options, iota_xref),
                        fun() ->
                            do_run(get_steps(Type),
-                                    iota_scanner:scan(Path))
+                                    iota_scanner:scan(Path, Options))
                        end).
 
 do_run(Checkers, Info) ->
