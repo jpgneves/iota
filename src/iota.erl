@@ -100,9 +100,10 @@ print_doc() ->
 doc() ->
   lists:flatten(
     io_lib:format(
-      "iota - A tool to help enforcing clean separation of responsabilities~n"
+      "iota - A tool to help enforcing clean separation of responsibilities~n"
       "Usage:~n"
       "  iota (check | describe_api) [<path>]~n"
+      "  iota [<path>]~n"
       "  iota -h | --help~n~n"
       "Options:~n"
       " -h --help         Show this screen~n",
