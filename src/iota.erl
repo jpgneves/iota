@@ -59,14 +59,21 @@ run(Command, Path) ->
   end.
 
 handle_result(_, unrecognized_command) -> halt(1);
-handle_result("check", Result)         -> format_check(Result);
-handle_result("describe-api", Result)  -> format_describe(Result).
+handle_result("check", Result)         -> format_check(Result),
+                                          return_code(Result);
+handle_result("describe-api", Result)  -> format_describe(Result),
+                                          return_code(Result).
 
 read_config(Path) ->
   case file:consult(filename:join(Path, "iota.config")) of
     {ok, Terms} -> Terms;
     {error, _}  -> []
   end.
+
+return_code([]) ->
+  halt();
+return_code(_) ->
+  halt(1).
 
 print_help() ->
   io:format("usage: iota [PATH] [CMD]~n~n  CMD can be one of the following:~n"
