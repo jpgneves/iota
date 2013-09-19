@@ -98,16 +98,14 @@ print_doc() ->
   io:format("~s", [doc()]).
 
 doc() ->
-  lists:flatten(
-    io_lib:format(
-      "iota - A tool to help enforcing clean separation of responsibilities~n"
-      "Usage:~n"
-      "  iota (check | describe_api) [<path>]~n"
-      "  iota [<path>]~n"
-      "  iota -h | --help~n~n"
-      "Options:~n"
-      " -h --help         Show this screen~n",
-     [])).
+  "iota - A tool to help enforcing clean separation of responsibilities
+   Usage:
+     iota (check | describe_api) [<path>]
+     iota [<path>]
+     iota -h | --help
+
+   Options:
+    -h --help         Show this screen".
 
 format_describe(Result) ->
   print_report_header(),
