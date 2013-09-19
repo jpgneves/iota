@@ -105,3 +105,11 @@ NOTE
 When running ```make test``` you'll see that the coverage of some modules is
 very low. This is due to the use of
 [moka](https://github.com/samuelrivas/moka) for mocking.
+
+Acknowledgements
+----------------
+
+Thanks to [Samuel Rivas](https://github.com/samuelrivas) for
+[moka](https://github.com/samuelrivas/moka) and
+[Håkan Nilsson](https://github.com/plux) for
+[docopt-erl](https://github.com/plux/docopt-erl).
