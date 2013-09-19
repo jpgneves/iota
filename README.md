@@ -35,7 +35,7 @@ Additionally, iota will emit warnings if you declare unexported functions
 as part of your API, and errors if any application calls non-API functions
 in modules belonging to other applications.
 
-Intra-module function calls are accepted regardless if they are declared
+Intra-application function calls are accepted regardless if they are declared
 as API or not.
 
 Running iota
@@ -97,6 +97,7 @@ Future work
 
 * Add support for more kinds of checking (e.g. layer checks through external
 declarations)
+* Plugins for various tools (e.g. rebar, EDTS)
 
 
 NOTE
