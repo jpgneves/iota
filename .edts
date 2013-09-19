@@ -1,0 +1,3 @@
+:name "iota"
+:node-sname "iota-dev"
+:lib-dirs '("lib")
