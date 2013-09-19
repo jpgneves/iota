@@ -33,19 +33,19 @@
 -spec main([string()]) -> ok | unrecognized_command.
 main(["help" | _ ]) ->
   print_help();
-main(["all" | _]) ->
+main(["check" | _]) ->
   {ok, Cwd} = file:get_cwd(),
-  handle_result("all", run("all", Cwd));
+  handle_result("check", run("check", Cwd));
 main(["describe-api" | _]) ->
   {ok, Cwd} = file:get_cwd(),
   handle_result("describe-api", run("describe-api", Cwd));
 main([ProjectPath, Cmd | _]) ->
   handle_result(Cmd, run(Cmd, ProjectPath));
 main([ProjectPath | _]) ->
-  handle_result("all", run("all", ProjectPath));
+  handle_result("check", run("check", ProjectPath));
 main([]) ->
   {ok, Cwd} = file:get_cwd(),
-  handle_result("all", run("all", Cwd)).
+  handle_result("check", run("check", Cwd)).
 
 run(Command, Path) ->
   try
@@ -56,12 +56,12 @@ run(Command, Path) ->
   end.
 
 handle_result(_, unrecognized_command) -> halt(1);
-handle_result("all", Result)           -> format_check(Result);
+handle_result("check", Result)         -> format_check(Result);
 handle_result("describe-api", Result)  -> format_describe(Result).
 
 print_help() ->
   io:format("usage: iota [PATH] [CMD]~n~n  CMD can be one of the following:~n"
-            "    all      - check for all types of violations (default)~n"
+            "    check        - check for all types of violations (default)~n"
             "    describe-api - describe the API of all applications").
 
 format_describe(Result) ->

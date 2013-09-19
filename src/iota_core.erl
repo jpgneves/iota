@@ -54,7 +54,7 @@ do_run(Checkers, Info) ->
 
 get_steps('describe-api') ->
   [fun describe_api/2];
-get_steps(all) ->
+get_steps(check) ->
   [fun verify_api/2];
 get_steps(_) ->
   throw(unrecognized_command).
