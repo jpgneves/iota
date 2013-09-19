@@ -3,12 +3,12 @@
 iota
 ====
 
-iota (Inter-dependency Objective Testing Apparatus) - a tool to enforce clean
+iota (Inter-dependency Objective Testing Apparatus) is a tool to enforce clean
 separation of responsibilities in Erlang code
 
 
 API declarations
-================
+----------------
 
 A module can be declared as an API module for an application (meaning it's
 a module other applications should invoke for functionality) in two ways.
@@ -39,7 +39,7 @@ Intra-module function calls are accepted regardless if they are declared
 as API or not.
 
 Running iota
-============
+------------
 
 You can run iota simply by doing (all examples use the applications provided
 in ```priv```):
@@ -70,16 +70,17 @@ for you:
       []
 
 Future work
-===========
+-----------
 
 * Improve internal consistency analysis
 * Add support for more kinds of checking (e.g. layer checks through external
 declarations)
 * Add support for whitelisting applications (i.e for applications which will
 never have iota annotations)
+* Make lib_dirs configurable, it now defaults to /path/to/app/lib
 
 NOTE
-====
+----
 
 When running ```make test``` you'll see that the coverage of some modules is
 very low. This is due to the use of
