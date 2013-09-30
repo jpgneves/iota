@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>iota by jpgneves</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>iota</h1>
+        <h2>iota (Inter-dependency Objective Testing Apparatus) - a tool to enforce clean separation of responsibilities in Erlang code</h2>
+        <a href="https://github.com/jpgneves/iota" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <p><a href="https://travis-ci.org/jpgneves/iota"><img src="https://travis-ci.org/jpgneves/iota.png?branch=master" alt="Build Status"></a></p>
+
+<h1>
+<a name="iota" class="anchor" href="#iota"><span class="octicon octicon-link"></span></a>iota</h1>
+
+<p>iota (Inter-dependency Objective Testing Apparatus) is a tool to enforce clean
+separation of responsibilities in Erlang code</p>
+
+<h2>
+<a name="api-declarations" class="anchor" href="#api-declarations"><span class="octicon octicon-link"></span></a>API declarations</h2>
+
+<p>A module can be declared as an API module for an application (meaning it's
+a module other applications should invoke for functionality) in two ways.</p>
+
+<p>You can explicitly declare the entire module as an API:</p>
+
+<div class="highlight highlight-erlang"><pre><span class="p">-</span><span class="ni">api</span><span class="p">(</span><span class="n">all</span><span class="p">).</span> <span class="c">%% Declares all exported functions as part of the module's API.</span>
+</pre></div>
+
+<p>or you can declare which exported functions are part of the API:</p>
+
+<div class="highlight highlight-erlang"><pre><span class="p">-</span><span class="ni">export</span><span class="p">([</span> <span class="n">foo</span><span class="o">/</span><span class="mi">1</span><span class="p">,</span> <span class="n">bar</span><span class="o">/</span><span class="mi">0</span> <span class="p">]).</span>
+<span class="p">-</span><span class="ni">api</span><span class="p">([</span> <span class="n">foo</span><span class="o">/</span><span class="mi">1</span> <span class="p">]).</span> <span class="c">%% Declares only foo/1 as part of the module's API.</span>
+</pre></div>
+
+<p>Declaring the API functions implicitly declares the module as an API module,
+and only declaring the module as an API module implicitly declares all
+exported functions as part of the API.</p>
+
+<p>If the module declares all its exported functions as part of its API, iota
+will emit a warning.</p>
+
+<p>Additionally, iota will emit warnings if you declare unexported functions
+as part of your API, and errors if any application calls non-API functions
+in modules belonging to other applications.</p>
+
+<p>Intra-application function calls are accepted regardless if they are declared
+as API or not.</p>
+
+<h2>
+<a name="running-iota" class="anchor" href="#running-iota"><span class="octicon octicon-link"></span></a>Running iota</h2>
+
+<p>You can run iota simply by doing (all examples use the applications provided
+in <code>priv</code>):</p>
+
+<pre><code>$ make escriptize
+$ ./iota check priv/test_app1
+ERROR: test_app2_mod:baz/0 calls non-API function test_app1_mod:xpto/2
+
+ERROR: test_app1_mod:foo/0 calls non-API module test_app2_mod
+
+===== iota report =====
+{test_app1_mod,foo,0} - Errors: 1, Warnings: 0
+{test_app2_mod,baz,0} - Errors: 1, Warnings: 0
+=======================
+Total - Errors:2 Warnings:0
+</code></pre>
+
+<p>Please note that your application must be compiled before, as iota uses xref for the more
+meaningful checks and your declarations need to be baked in as well. :)</p>
+
+<p>You can also ask iota to describe the API of all applications on the given path
+for you:</p>
+
+<pre><code>$ ./iota describe_api priv/test_app1
+===== iota report =====
+API for test_app1:
+  [{test_app1_mod,xpto,1}]
+API for test_app2:
+  []
+</code></pre>
+
+<h2>
+<a name="whitelisting-applications" class="anchor" href="#whitelisting-applications"><span class="octicon octicon-link"></span></a>Whitelisting applications</h2>
+
+<p>It's possible to whitelist applications from the checks, for applications
+that do not and will not have iota annotations (e.g. third-party libraries).</p>
+
+<p>To do so, in the root of your top-level application, create a
+<code>iota.config</code> file and include the following:</p>
+
+<div class="highlight highlight-erlang"><pre><span class="p">{</span><span class="n">ignore_apps</span><span class="p">,</span> <span class="p">[</span><span class="n">app1</span><span class="p">,</span> <span class="n">app2</span><span class="p">]}.</span>
+</pre></div>
+
+<p>where <code>[app1, app2]</code> are the applications you wish to whitelist.</p>
+
+<h2>
+<a name="setting-library-path" class="anchor" href="#setting-library-path"><span class="octicon octicon-link"></span></a>Setting library path</h2>
+
+<p>In your <code>iota.config</code> file, use the following to set your library path:</p>
+
+<div class="highlight highlight-erlang"><pre><span class="p">{</span><span class="n">lib_dirs</span><span class="p">,</span> <span class="p">[</span><span class="s">"deps"</span><span class="p">]}.</span>
+</pre></div>
+
+<p>If not set, <code>lib_dirs</code> defaults to <code>/path/to/app/lib</code>.</p>
+
+<h2>
+<a name="future-work" class="anchor" href="#future-work"><span class="octicon octicon-link"></span></a>Future work</h2>
+
+<ul>
+<li>Add support for more kinds of checking (e.g. layer checks through external
+declarations)</li>
+<li>Plugins for various tools (e.g. rebar, EDTS)</li>
+</ul><h2>
+<a name="note" class="anchor" href="#note"><span class="octicon octicon-link"></span></a>NOTE</h2>
+
+<p>When running <code>make test</code> you'll see that the coverage of some modules is
+very low. This is due to the use of
+<a href="https://github.com/samuelrivas/moka">moka</a> for mocking.</p>
+
+<h2>
+<a name="acknowledgements" class="anchor" href="#acknowledgements"><span class="octicon octicon-link"></span></a>Acknowledgements</h2>
+
+<p>Thanks to <a href="https://github.com/samuelrivas">Samuel Rivas</a> for
+<a href="https://github.com/samuelrivas/moka">moka</a> and
+<a href="https://github.com/plux">Håkan Nilsson</a> for
+<a href="https://github.com/plux/docopt-erl">docopt-erl</a>.</p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/jpgneves/iota/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/jpgneves/iota/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/jpgneves/iota"></a> is maintained by <a href="https://github.com/jpgneves">jpgneves</a>.</p>
+
+          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
