@@ -107,8 +107,8 @@ format_xref_query(Format, Args) ->
 maybe_start_xref_server(XrefServer) when is_pid(XrefServer) ->
   XrefServer;
 maybe_start_xref_server(XrefServer) ->
-  case whereis(XrefServer) of
-    undefined -> {ok, _} = xref:start(XrefServer);
-    _         -> ok
-  end,
+  _ = case whereis(XrefServer) of
+        undefined -> {ok, _} = xref:start(XrefServer);
+        _         -> ok
+      end,
   XrefServer.

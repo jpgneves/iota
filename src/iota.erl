@@ -30,7 +30,7 @@
 
 -export([ main/1 ]).
 
--spec main([string()]) -> ok | unrecognized_command.
+-spec main([string()]) -> ok.
 main(Args) ->
   try docopt:docopt(doc(), string:join(Args, " ")) of
       Out -> start(Out)
@@ -77,10 +77,11 @@ run(Command, Path) ->
                                   unrecognized_command
   end.
 
+-spec handle_result(string(), any()) -> no_return().
 handle_result(_, unrecognized_command) -> halt(1);
 handle_result("check", Result)         -> format_check(Result),
                                           return_code(Result);
-handle_result("describe_api", Result)  -> format_describe(Result),
+handle_result("describe_api", Result)  -> _ = format_describe(Result),
                                           return_code(Result).
 
 read_config(Path) ->
@@ -89,6 +90,7 @@ read_config(Path) ->
     {error, _}  -> []
   end.
 
+-spec return_code(Result::any()) -> no_return().
 return_code([]) ->
   halt();
 return_code(_) ->

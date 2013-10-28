@@ -34,6 +34,9 @@
 -type error()   :: any().
 -type source()  :: module() | mfa().
 
+-export_type([ error/0,
+               warning/0 ]).
+
 %% @doc Print warning to stdout and add it to the current result set
 -spec emit_warning(Results::iota_result:iota_result(), Source::source(),
                    Warning::warning()) -> iota_result:iota_result().

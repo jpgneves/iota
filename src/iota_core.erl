@@ -34,6 +34,8 @@
 -type directory() :: string().
 -type options()   :: [{xref_server, atom()|pid()}|{ignore_apps, [term()]}].
 
+-export_type([ options/0 ]).
+
 %% @doc Run the specified command for the given Path.
 -spec run(Type::command(), Path::directory(), Options::options())
            -> any().
