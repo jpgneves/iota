@@ -40,6 +40,8 @@
 -type iota_result() :: orddict:orddict().
 -type result_info() :: {{errors, [term()]}, {warnings, [term()]}}.
 
+-export_type([ iota_result/0 ]).
+
 %% @doc Create a new iota result aggregator
 -spec new() -> iota_result().
 new() -> orddict:new().

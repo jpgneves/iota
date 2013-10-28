@@ -35,6 +35,8 @@
 -type iota_info_item() :: {module(), term()}.
 -type iota_info()      :: [iota_info_item()].
 
+-export_type([ iota_info_item/0 ]).
+
 %% @doc Scan the given path and extract iota information from BEAM attributes
 %% for all applications found in the path. Additionally, we add information
 %% for all applications found in the iota xref server.
@@ -51,15 +53,16 @@ scan(Path, Options) ->
   XrefServer = iota_utils:get_xref_server(),
   AbsPath = filename:absname(Path),
   Apps = get_applications(AbsPath, Options),
-  lists:map(fun(A) ->
-                case xref:add_application(XrefServer, A, [{warnings, false}]) of
-                  {ok, _} = R -> R;
-                  {error, _, {application_clash, _}} ->
-                    N = generate_new_name(A),
-                    xref:add_application(XrefServer, A, [{warnings, false},
-                                                         {name, N}])
-                end
-            end, Apps),
+  _ = lists:map(fun(A) ->
+                    case xref:add_application(XrefServer,
+                                              A, [{warnings, false}]) of
+                      {ok, _} = R -> R;
+                      {error, _, {application_clash, _}} ->
+                        N = generate_new_name(A),
+                        xref:add_application(XrefServer, A, [{warnings, false},
+                                                             {name, N}])
+                    end
+                end, Apps),
   LibEbins = [filename:join([A, "ebin"]) || A <- Apps],
   code:add_paths(LibEbins),
   Beams = beams(LibEbins),
