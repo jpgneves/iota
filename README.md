@@ -111,6 +111,6 @@ Acknowledgements
 ----------------
 
 Thanks to [Samuel Rivas](https://github.com/samuelrivas) for
-[moka](https://github.com/samuelrivas/moka) and
+[moka](https://github.com/samuelrivas/moka) and the nice Dialyzer scripts, and
 [Håkan Nilsson](https://github.com/plux) for
 [docopt-erl](https://github.com/plux/docopt-erl).
