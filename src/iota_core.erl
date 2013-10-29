@@ -32,7 +32,10 @@
 
 -type command()   :: atom().
 -type directory() :: string().
--type options()   :: [{xref_server, atom()|pid()}|{ignore_apps, [term()]}].
+-type options()   :: [{xref_server, atom()|pid()}   |
+                      {ignore_apps, [term()]}       |
+                      {keep_xref_server, boolean()}
+                     ].
 
 -export_type([ options/0 ]).
 
@@ -40,11 +43,12 @@
 -spec run(Type::command(), Path::directory(), Options::options())
            -> any().
 run(Type, Path, Options) ->
+  KeepXref = iota_utils:get(keep_xref_server, Options, false),
   iota_utils:with_xref(iota_utils:get(xref_server, Options, iota_xref),
                        fun() ->
                            do_run(get_steps(Type),
                                     iota_scanner:scan(Path, Options))
-                       end).
+                       end, KeepXref).
 
 do_run(Checkers, Info) ->
   R = lists:foldl(fun(I, Acc) ->
