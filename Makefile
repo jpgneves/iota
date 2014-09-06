@@ -2,7 +2,7 @@ DIALYZER_PLT := .dialyzer.plt
 PRODUCTION_ERLS := $(wildcard src/*.erl)
 PRODUCTION_BEAMS := $(addprefix ebin/, $(notdir $(PRODUCTION_ERLS:.erl=.beam)))
 
-.PHONY: test eunit ct clean dialyze check
+.PHONY: test eunit ct clean dialyze check examples
 
 all: compile
 
@@ -20,6 +20,9 @@ $(DIALYZER_PLT):
 
 escriptize: compile
 	./rebar escriptize skip_deps=true
+
+examples:
+	$(MAKE) -C priv/test_app1
 
 get-deps:
 	./rebar get-deps
