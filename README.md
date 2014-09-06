@@ -45,6 +45,7 @@ You can run iota simply by doing (all examples use the applications provided
 in ```priv```):
 
     $ make escriptize
+    $ make examples
     $ ./iota check priv/test_app1
     ERROR: test_app2_mod:baz/0 calls non-API function test_app1_mod:xpto/2
 
